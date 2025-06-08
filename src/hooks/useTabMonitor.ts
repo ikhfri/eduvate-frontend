@@ -1,11 +1,10 @@
-// hooks/useTabMonitor.ts
 import { useEffect, useRef, useCallback } from "react";
 
 /**
- * Custom hook untuk memonitor aktivitas pengguna meninggalkan tab/jendela.
- * @param onLimitReached - Callback yang dipanggil saat batas pelanggaran tercapai.
- * @param limit - Batas jumlah pelanggaran. Default 5.
- * @param onViolation - Callback opsional yang dipanggil setiap kali pelanggaran terdeteksi. Menerima jumlah pelanggaran saat ini.
+
+ * @param onLimitReached 
+ * @param limit -
+ * @param onViolation 
  */
 export function useTabMonitor(
   onLimitReached: () => void,
@@ -16,7 +15,6 @@ export function useTabMonitor(
   const lastViolationTime = useRef(0);
 
   const handleViolation = useCallback(() => {
-    // Debounce untuk mencegah event blur dan visibilitychange terpicu bersamaan
     const now = Date.now();
     if (now - lastViolationTime.current < 500) {
       return;
@@ -25,12 +23,10 @@ export function useTabMonitor(
 
     counterRef.current += 1;
 
-    // Panggil callback onViolation jika ada
     if (onViolation) {
       onViolation(counterRef.current);
     }
 
-    // Periksa apakah batas tercapai
     if (counterRef.current >= limit) {
       onLimitReached();
     }

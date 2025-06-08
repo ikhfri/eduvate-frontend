@@ -141,23 +141,27 @@ export default function DashboardPage() {
         text: "Selamat Pagi",
         Icon: Sun,
         gradient: "from-amber-400 to-orange-500",
+        timeOfDay: "morning",
       };
     if (hour < 15)
       return {
         text: "Selamat Siang",
         Icon: CloudSun,
         gradient: "from-sky-400 to-cyan-500",
+        timeOfDay: "afternoon",
       };
     if (hour < 18)
       return {
         text: "Selamat Sore",
         Icon: Sunset,
-        gradient: "from-indigo-500 to-purple-600",
+        gradient: "from-orange-500 to-red-600", // Changed to a warmer color
+        timeOfDay: "evening",
       };
     return {
       text: "Selamat Malam",
       Icon: Moon,
       gradient: "from-gray-800 via-gray-900 to-black",
+      timeOfDay: "night",
     };
   };
 
@@ -165,6 +169,7 @@ export default function DashboardPage() {
     text: greeting,
     Icon: GreetingIcon,
     gradient: greetingGradient,
+    timeOfDay,
   } = getTimeBasedInfo();
 
   const renderStudentDashboard = () => (
@@ -279,32 +284,76 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className="space-y-8">
         {user && (
-          <>
-            <div
-              className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient}`}
-            >
-              <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-5"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-2">
-                  <GreetingIcon className="h-8 w-8" />
-                  <p className="text-2xl font-semibold">{greeting},</p>
-                </div>
-                <h1 className="text-4xl font-bold">
-                  {user.name?.split(" ")[0] || user.email}!
-                </h1>
-                <p className="mt-2 text-white/80">
-                  Peran Anda: <span className="font-bold">{user.role}</span>.
-                  Semoga harimu menyenangkan!
-                </p>
-              </div>
-            </div>
+          <div
+            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient} greeting-container`}
+          >
+            {/* Sun element */}
+            {(timeOfDay === "morning" || timeOfDay === "afternoon") && (
+              <div className="sun"></div>
+            )}
 
-            {user.role === "STUDENT"
-              ? renderStudentDashboard()
-              : renderAdminMentorDashboard()}
-          </>
+            {/* Moon element */}
+            {timeOfDay === "night" && <div className="moon"></div>}
+
+            <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <GreetingIcon className="h-8 w-8" />
+                <p className="text-2xl font-semibold">{greeting},</p>
+              </div>
+              <h1 className="text-4xl font-bold">
+                {user.name?.split(" ")[0] || user.email}!
+              </h1>
+              <p className="mt-2 text-white/80">
+                Peran Anda: <span className="font-bold">{user.role}</span>.
+                Semoga harimu menyenangkan!
+              </p>
+            </div>
+          </div>
         )}
+
+        {user?.role === "STUDENT"
+          ? renderStudentDashboard()
+          : renderAdminMentorDashboard()}
       </div>
+      <style jsx>{`
+        .greeting-container {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .sun {
+          position: absolute;
+          width: 70px;
+          height: 70px;
+          background: radial-gradient(
+            circle at center,
+            #fffae6 0%,
+            #f9d71c 50%,
+            #ffc107 100%
+          );
+          border-radius: 50%;
+          top: 15px;
+          right: 25px;
+          box-shadow: 0 0 30px rgba(255, 193, 7, 0.7);
+        }
+
+        .moon {
+          position: absolute;
+          width: 60px;
+          height: 60px;
+          background: radial-gradient(
+            circle at center,
+            #f0f0f0 0%,
+            #e0e0e0 50%,
+            #d3d3d3 100%
+          );
+          border-radius: 50%;
+          top: 20px;
+          right: 30px;
+          box-shadow: 0 0 20px rgba(211, 211, 211, 0.8);
+        }
+      `}</style>
     </ProtectedRoute>
   );
 }
