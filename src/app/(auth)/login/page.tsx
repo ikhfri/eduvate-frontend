@@ -43,7 +43,8 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || "Login gagal. Silakan coba lagi.";
+        err.response?.data?.message ||
+        "Login gagal. Silakan periksa kembali username dan password Anda.";
       setError(errorMessage);
       toast({
         title: "Login Gagal",
