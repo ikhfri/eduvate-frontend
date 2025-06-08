@@ -229,7 +229,7 @@ export default function DashboardPage() {
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="p-4 bg-primary/10 border-b border-border">
           <h3 className="text-xl font-semibold text-foreground">
-            Panel Pengelolaan
+            Dashboard
           </h3>
         </div>
         <div className="p-6">

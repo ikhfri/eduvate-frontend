@@ -1,6 +1,6 @@
 // components/Sidebar.tsx
 "use client";
-import React from "react"; // Hapus useState karena state dikontrol oleh parent
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import {
   BarChart3,
   LogOut,
   LucideIcon,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -74,19 +75,16 @@ const NavLink = ({
   );
 };
 
-// FIX: Definisikan interface untuk props yang diterima dari RootLayout
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// FIX: Terima props isOpen dan setIsOpen
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  // Logika untuk menampilkan menu navigasi berdasarkan peran
   const navGroups: NavGroup[] = [
     {
       title: "Menu Utama",
@@ -108,6 +106,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           href: "/dashboard/my-stats",
           label: "Statistik Saya",
           icon: BarChart3,
+        },
+        {
+          href: "/dashboard/ranking",
+          label: "Peringkat",
+          icon: Trophy,
         }
       );
     } else if (user.role === "ADMIN" || user.role === "MENTOR") {
@@ -134,6 +137,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               ]
             : []),
           { href: "/dashboard/stats", label: "Statistik", icon: BarChart3 },
+          {
+            href: "/dashboard/ranking",
+            label: "Peringkat",
+            icon: Trophy,
+          },
         ],
       });
     }
@@ -153,7 +161,17 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   return (
     <>
-      {/* Overlay untuk mobile saat sidebar terbuka */}
+      {/* Menambahkan style untuk menyembunyikan scrollbar */}
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+      `}</style>
+      
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 md:hidden"
@@ -166,11 +184,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           "fixed top-0 left-0 z-40 w-72 h-screen transition-transform duration-300 ease-in-out",
           "bg-card dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 border-r border-border dark:border-slate-800",
           "flex flex-col",
-          // Logika tampilan mobile sekarang dikontrol oleh prop 'isOpen'
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex flex-col items-center justify-center pt-8 pb-6 px-4 flex-shrink-0">
+        <div className="flex flex-col items-center justify-center pt-6 pb-4 px-4 flex-shrink-0">
           <Link href="/dashboard" className="flex flex-col items-center gap-2">
             <Image height={60} width={60} src="/logo.png" alt="logo" />
             <span className="text-xl font-bold text-foreground whitespace-nowrap">
@@ -179,9 +196,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </Link>
         </div>
 
-        <nav className="flex-grow px-4 overflow-y-auto">
+        {/* Menambahkan class 'no-scrollbar' ke elemen nav */}
+        <nav className="flex-grow px-4 overflow-y-auto no-scrollbar">
           {navGroups.map((group) => (
-            <div key={group.title} className="mb-6">
+            <div key={group.title} className="mb-4">
               <h3 className="px-3 mb-2 text-xs font-bold tracking-wider text-muted-foreground uppercase">
                 {group.title}
               </h3>
@@ -199,7 +217,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="px-4 py-4 mt-auto border-t border-border dark:border-slate-800 flex-shrink-0">
+        <div className="px-4 py-3 mt-auto border-t border-border dark:border-slate-800 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
               {user?.name ? user.name.charAt(0).toUpperCase() : <Users />}
@@ -220,7 +238,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               <LogOut className="w-5 h-5" />
             </button>
           </div>
-          <div className="text-center mt-4 pt-4 border-t border-border/50 dark:border-slate-800/50">
+
+          <div className="text-center mt-3 pt-3 border-t border-border/50 dark:border-slate-800/50">
             <p className="text-xs text-muted-foreground/80">
               © {new Date().getFullYear()} NEVTIK
             </p>
