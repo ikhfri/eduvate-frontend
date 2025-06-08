@@ -1,0 +1,331 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  format,
+  parseISO,
+  isPast,
+  differenceInDays,
+  formatDistanceToNow,
+  isValid as isValidDate,
+} from "date-fns";
+import { id as LocaleID } from "date-fns/locale";
+import { useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import {
+
+  BookText,
+  CalendarClock,
+  UserCircle2,
+  Info,
+  Award,
+  PlusCircle,
+  ArrowRight,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { fetchApi } from "@/lib/fetchApi";
+
+interface MySubmission {
+  grade?: number | null;
+  submittedAt: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  submissionStartDate: string;
+  deadline: string;
+  author?: {
+    name: string;
+    email?: string;
+  };
+  mySubmission?: MySubmission | null;
+}
+
+// --- KOMPONEN KARTU TUGAS BARU ---
+const TaskCard = ({
+  task,
+  statusBadge,
+  ctaButton,
+}: {
+  task: Task;
+  statusBadge: JSX.Element;
+  ctaButton: JSX.Element;
+}) => (
+  <div className="bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1.5">
+    {/* BAGIAN HEADER BARU DENGAN GRADIENT */}
+    <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-700 text-white relative">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10"></div>
+      <div className="relative z-10">
+        <h3 className="text-lg font-bold line-clamp-2 leading-tight drop-shadow-sm">
+          {task.title}
+        </h3>
+        <div className="flex items-center text-xs text-white/80 pt-2">
+          <UserCircle2 className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+          Dibuat oleh: {task.author?.name || "N/A"}
+        </div>
+      </div>
+    </div>
+
+    {/* BAGIAN KONTEN (TETAP BERSIH AGAR MUDAH DIBACA) */}
+    <div className="p-5 flex-grow">
+      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+        {task.description || "Tidak ada deskripsi."}
+      </p>
+      <div className="space-y-2 text-sm text-foreground">
+        <div className="flex items-center gap-2.5">
+          <CalendarClock className="w-4 h-4 text-green-500 flex-shrink-0" />
+          <span className="font-medium">Mulai:</span>
+          <span className="text-muted-foreground">
+            {formatDateSafe(task.submissionStartDate, "dd MMM yyyy, HH:mm")}
+          </span>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <CalendarClock className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <span className="font-medium">Deadline:</span>
+          <span className="text-muted-foreground">
+            {formatDateSafe(task.deadline, "dd MMM yyyy, HH:mm")}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {/* BAGIAN FOOTER */}
+    <div className="flex justify-between items-center border-t border-border p-4 bg-secondary/20 mt-auto">
+      {statusBadge}
+      {ctaButton}
+    </div>
+  </div>
+);
+
+const formatDateSafe = (dateString: string, formatPattern: string) => {
+  if (!dateString || !isValidDate(parseISO(dateString))) return "N/A";
+  return format(parseISO(dateString), formatPattern, { locale: LocaleID });
+};
+
+export default function StudentTaskListPage() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading, token } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await fetchApi("/tasks", { token });
+        setTasks(Array.isArray(data) ? data : data.tasks || []);
+      } catch (err: any) {
+        console.error("Gagal mengambil daftar tugas:", err);
+        const errorMessage =
+          err.message || "Gagal mengambil data tugas dari server.";
+        setError(errorMessage);
+        toast({
+          title: "Error Mengambil Tugas",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (!authLoading) {
+      if (user) {
+        fetchTasks();
+      } else {
+        const router = useRouter();
+        router.push("/login");
+      }
+    }
+  }, [user, authLoading, toast, token]);
+
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      const aDeadline = parseISO(a.deadline);
+      const bDeadline = parseISO(b.deadline);
+      const aIsPast = isPast(aDeadline);
+      const bIsPast = isPast(bDeadline);
+      if (aIsPast && !bIsPast) return 1;
+      if (!aIsPast && bIsPast) return -1;
+      return aDeadline.getTime() - bDeadline.getTime();
+    });
+  }, [tasks]);
+
+  const getTaskStatusBadge = (task: Task) => {
+    const baseClasses =
+      "text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5";
+    if (user?.role === "STUDENT" && task.mySubmission) {
+      if (typeof task.mySubmission.grade === "number") {
+        const grade = task.mySubmission.grade;
+        if (grade >= 80)
+          return (
+            <div
+              className={`${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300`}
+            >
+              <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+            </div>
+          );
+        if (grade >= 70)
+          return (
+            <div
+              className={`${baseClasses} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300`}
+            >
+              <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+            </div>
+          );
+        return (
+          <div
+            className={`${baseClasses} bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300`}
+          >
+            <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+          </div>
+        );
+      }
+      return (
+        <div
+          className={`${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300`}
+        >
+          Sudah Dikumpulkan
+        </div>
+      );
+    }
+    if (!task.deadline || !isValidDate(parseISO(task.deadline)))
+      return (
+        <div
+          className={`${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300`}
+        >
+          N/A
+        </div>
+      );
+    const deadlineDate = parseISO(task.deadline);
+    const timeLeftText = formatDistanceToNow(deadlineDate, {
+      addSuffix: true,
+      locale: LocaleID,
+    });
+    if (isPast(deadlineDate))
+      return (
+        <div
+          className={`${baseClasses} bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400`}
+        >
+          Lewat Tenggat
+        </div>
+      );
+    const daysLeft = differenceInDays(deadlineDate, new Date());
+    if (daysLeft <= 1)
+      return (
+        <div
+          className={`${baseClasses} bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300`}
+        >
+          {timeLeftText}
+        </div>
+      );
+    if (daysLeft <= 3)
+      return (
+        <div
+          className={`${baseClasses} bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300`}
+        >
+          {timeLeftText}
+        </div>
+      );
+    if (daysLeft <= 7)
+      return (
+        <div
+          className={`${baseClasses} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300`}
+        >
+          {timeLeftText}
+        </div>
+      );
+    return (
+      <div
+        className={`${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300`}
+      >
+        {timeLeftText}
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    /* ... Tampilan Loading ... */
+  }
+  if (error) {
+    /* ... Tampilan Error ... */
+  }
+
+  return (
+    <ProtectedRoute allowedRoles={["STUDENT", "ADMIN", "MENTOR"]}>
+      <div className="space-y-8">
+        <div className="relative p-8 rounded-2xl shadow-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white overflow-hidden">
+          <BookText className="absolute -right-8 -bottom-8 h-48 w-48 text-white/10" />
+          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-4xl font-bold">Daftar Tugas</h1>
+              <p className="mt-2 text-white/80">
+                Lihat, kerjakan, dan lacak semua tugas Anda di sini.
+              </p>
+            </div>
+            {(user?.role === "ADMIN" || user?.role === "MENTOR") && (
+              <Link
+                href="/dashboard/manage-tugas/new"
+                className="inline-flex items-center gap-2 px-4 py-2 font-semibold bg-white/90 text-primary rounded-lg shadow-sm hover:bg-white transition-colors flex-shrink-0"
+              >
+                <PlusCircle className="w-5 h-5" />
+                Tambah Tugas Baru
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {sortedTasks.length === 0 ? (
+          <div className="text-center p-16 bg-card rounded-xl border-2 border-dashed border-border">
+            <Info className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+            <h3 className="text-2xl font-semibold text-foreground">
+              Belum Ada Tugas
+            </h3>
+            <p className="mt-2 text-muted-foreground">
+              Saat ini belum ada tugas yang tersedia.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {sortedTasks.map((task) => {
+              const ctaButton = (
+                <Link
+                  href={`/dashboard/tugas/${task.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
+                >
+                  <span>
+                    {user?.role === "STUDENT" &&
+                    task.mySubmission &&
+                    typeof task.mySubmission.grade === "number"
+                      ? "Lihat Penilaian"
+                      : user?.role === "STUDENT" && task.mySubmission
+                      ? "Lihat Status"
+                      : user?.role === "STUDENT"
+                      ? "Kerjakan"
+                      : "Lihat Detail"}
+                  </span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              );
+              return (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  statusBadge={getTaskStatusBadge(task)}
+                  ctaButton={ctaButton}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </ProtectedRoute>
+  );
+}
