@@ -91,7 +91,7 @@ export default function LoginPage() {
             Selamat Datang di
           </p>
           <h1 className="text-6xl font-extrabold leading-tight tracking-tighter drop-shadow-md">
-            NEVTIK LMS
+            NEVTIK Learning Platform
           </h1>
           <p className="mt-4 text-lg max-w-sm text-white/80">
             Platform pembelajaran Anda untuk meraih masa depan yang lebih cerah.
