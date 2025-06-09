@@ -171,7 +171,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           scrollbar-width: none; /* Firefox */
         }
       `}</style>
-      
+
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 md:hidden"
@@ -188,11 +188,16 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         )}
       >
         <div className="flex flex-col items-center justify-center pt-6 pb-4 px-4 flex-shrink-0">
-          <Link href="/dashboard" className="flex flex-col items-center gap-2">
-            <Image height={60} width={60} src="/logo.png" alt="logo" />
-            <span className="text-xl font-bold text-foreground whitespace-nowrap">
-              NEVTIK LMS
-            </span>
+          <Link href="/dashboard" className="flex flex-row items-center gap-2">
+            <Image height={65} width={65} src="/icon.png" alt="logo" />
+            <div className="flex flex-col ">
+              <span className="text-xl font-bold text-foreground whitespace-nowrap">
+                NEVTIK
+              </span>
+              <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                Learning Platform
+              </span>
+            </div>
           </Link>
         </div>
 
