@@ -22,6 +22,7 @@ import {
   Sunset,
   Moon,
   Award,
+  Star,
 } from "lucide-react";
 
 // Komponen Kartu Statistik Gradien
@@ -111,57 +112,66 @@ const ActionCard = ({
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const [loadingStats, setLoadingStats] = useState(true);
-  const [stats, setStats] = useState<any>({}); // Dibuat fleksibel untuk menampung semua jenis stats
+  const [stats, setStats] = useState<any>({});
   const router = useRouter();
 
   const fetchStats = useCallback(async () => {
+    if (!user) return;
     setLoadingStats(true);
     try {
-      // Selalu memanggil satu endpoint /stats yang cerdas
       const response = await axiosInstance.get("/stats");
-      const statsData = response.data?.data || {};
-      setStats(statsData);
+      setStats(response.data?.data || {});
     } catch (error) {
       console.error("Gagal memuat statistik dashboard:", error);
-      setStats({}); // Reset jika gagal
+      setStats({});
     } finally {
       setLoadingStats(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (user) fetchStats();
-    else if (!user && !authLoading) setLoadingStats(false);
+    if (user) {
+      fetchStats();
+    } else if (!user && !authLoading) {
+      setLoadingStats(false);
+    }
   }, [user, authLoading, fetchStats]);
 
   const getTimeBasedInfo = () => {
     const hour = new Date().getHours();
-    if (hour < 11)
+    if (hour >= 5 && hour < 11) {
       return {
         text: "Selamat Pagi",
         Icon: Sun,
-        gradient: "from-amber-400 to-orange-500",
-        timeOfDay: "morning",
+        gradient: "from-sky-400 via-blue-500 to-indigo-600",
+        animationClass: "animate-sunrise",
+        skyObject: "sun",
       };
-    if (hour < 15)
+    }
+    if (hour >= 11 && hour < 15) {
       return {
         text: "Selamat Siang",
         Icon: CloudSun,
-        gradient: "from-sky-400 to-cyan-500",
-        timeOfDay: "afternoon",
+        gradient: "from-sky-500 to-cyan-500",
+        animationClass: "animate-day",
+        skyObject: "sun",
       };
-    if (hour < 18)
+    }
+    if (hour >= 15 && hour < 18) {
       return {
         text: "Selamat Sore",
         Icon: Sunset,
-        gradient: "from-orange-500 to-red-600", // Changed to a warmer color
-        timeOfDay: "evening",
+        gradient: "from-orange-500 via-red-500 to-purple-700",
+        animationClass: "animate-sunset",
+        skyObject: "sun",
       };
+    }
     return {
       text: "Selamat Malam",
       Icon: Moon,
       gradient: "from-gray-800 via-gray-900 to-black",
-      timeOfDay: "night",
+      animationClass: "animate-moon",
+      skyObject: "moon",
     };
   };
 
@@ -169,7 +179,8 @@ export default function DashboardPage() {
     text: greeting,
     Icon: GreetingIcon,
     gradient: greetingGradient,
-    timeOfDay,
+    animationClass,
+    skyObject,
   } = getTimeBasedInfo();
 
   const renderStudentDashboard = () => (
@@ -229,14 +240,14 @@ export default function DashboardPage() {
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="p-4 bg-primary/10 border-b border-border">
           <h3 className="text-xl font-semibold text-foreground">
-            Dashboard
+            Panel Pengelolaan
           </h3>
         </div>
         <div className="p-6">
           <ul className="space-y-4 text-muted-foreground">
             <li className="flex items-center gap-3">
               <FilePenLine className="h-5 w-5 text-primary" />
-              <span>Kelola tugas dan materi.</span>
+              <span>Kelola tugas dan materi pembelajaran.</span>
             </li>
             <li className="flex items-center gap-3">
               <ListChecks className="h-5 w-5 text-primary" />
@@ -285,17 +296,26 @@ export default function DashboardPage() {
       <div className="space-y-8">
         {user && (
           <div
-            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient} greeting-container`}
+            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient}`}
           >
-            {/* Sun element */}
-            {(timeOfDay === "morning" || timeOfDay === "afternoon") && (
-              <div className="sun"></div>
+            <div
+              className={`absolute w-24 h-24 rounded-full ${animationClass} z-0`}
+            >
+              {skyObject === "sun" && (
+                <div className="w-full h-full bg-yellow-300 rounded-full shadow-[0_0_40px_10px_rgba(253,224,71,0.5)]" />
+              )}
+              {skyObject === "moon" && (
+                <div className="w-full h-full bg-slate-200 rounded-full shadow-[0_0_30px_5px_rgba(226,232,240,0.4)]" />
+              )}
+            </div>
+            {skyObject === "moon" && (
+              <>
+                <Star className="absolute top-[20%] left-[15%] h-3 w-3 text-white/70 animate-pulse" />
+                <Star className="absolute top-[30%] left-[80%] h-2 w-2 text-white/70 animate-pulse [animation-delay:0.5s]" />
+                <Star className="absolute top-[60%] left-[50%] h-4 w-4 text-white/70 animate-pulse [animation-delay:1s]" />
+                <Star className="absolute top-[80%] left-[25%] h-2 w-2 text-white/70 animate-pulse [animation-delay:1.5s]" />
+              </>
             )}
-
-            {/* Moon element */}
-            {timeOfDay === "night" && <div className="moon"></div>}
-
-            <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-5"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
                 <GreetingIcon className="h-8 w-8" />
@@ -316,42 +336,65 @@ export default function DashboardPage() {
           ? renderStudentDashboard()
           : renderAdminMentorDashboard()}
       </div>
-      <style jsx>{`
-        .greeting-container {
-          position: relative;
-          overflow: hidden;
+      <style jsx global>{`
+        @keyframes sunrise {
+          0% {
+            transform: translate(-50px, 100px) scale(0.8);
+            opacity: 0;
+          }
+          100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes day {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(0, -10px);
+          }
+        }
+        @keyframes sunset {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(50px, 100px) scale(0.8);
+            opacity: 0;
+          }
+        }
+        @keyframes moon {
+          0% {
+            transform: translateY(10px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
-        .sun {
-          position: absolute;
-          width: 70px;
-          height: 70px;
-          background: radial-gradient(
-            circle at center,
-            #fffae6 0%,
-            #f9d71c 50%,
-            #ffc107 100%
-          );
-          border-radius: 50%;
+        .animate-sunrise {
+          animation: sunrise 1.5s ease-out forwards;
+          top: 20px;
+          left: 20px;
+        }
+        .animate-day {
+          animation: day 8s ease-in-out infinite alternate;
           top: 15px;
-          right: 25px;
-          box-shadow: 0 0 30px rgba(255, 193, 7, 0.7);
+          left: 45%;
         }
-
-        .moon {
-          position: absolute;
-          width: 60px;
-          height: 60px;
-          background: radial-gradient(
-            circle at center,
-            #f0f0f0 0%,
-            #e0e0e0 50%,
-            #d3d3d3 100%
-          );
-          border-radius: 50%;
+        .animate-sunset {
+          animation: sunset 1.5s ease-in forwards;
+          top: 20px;
+          right: 20px;
+        }
+        .animate-moon {
+          animation: moon 2s ease-in-out forwards;
           top: 20px;
           right: 30px;
-          box-shadow: 0 0 20px rgba(211, 211, 211, 0.8);
         }
       `}</style>
     </ProtectedRoute>
