@@ -16,6 +16,7 @@ import {
   Eye,
   AlertCircle,
   FileQuestion,
+  Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isValid } from "date-fns";
@@ -49,7 +50,6 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
-// Komponen Menu Aksi Kustom
 const ActionMenu = ({
   quiz,
   onDelete,
@@ -102,6 +102,14 @@ const ActionMenu = ({
               className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent"
             >
               <Edit3 className="h-4 w-4" /> Edit Kuis
+            </button>
+            <button
+              onClick={createClickHandler(
+                `/dashboard/manage-kuis/${quiz.id}/submissions`
+              )}
+              className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent"
+            >
+              <Users className="h-4 w-4" /> Lihat Pengumpulan
             </button>
             <button
               onClick={createClickHandler(
@@ -263,7 +271,7 @@ export default function ManageQuizzesPage() {
             </div>
           ) : quizzes.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full  text-sm">
                 <thead className="bg-secondary/50">
                   <tr>
                     <th className="p-4 text-left font-semibold text-muted-foreground w-12">
