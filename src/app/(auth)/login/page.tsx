@@ -91,10 +91,11 @@ export default function LoginPage() {
             Selamat Datang di
           </p>
           <h1 className="text-6xl font-extrabold leading-tight tracking-tighter drop-shadow-md">
-            NEVTIK Learning Platform
+            NEVTIK LP
           </h1>
           <p className="mt-4 text-lg max-w-sm text-white/80">
-            Platform pembelajaran Anda untuk meraih masa depan yang lebih cerah.
+            &quot;Everyone can browse, but only a few know how the internet works. Be
+            the one who understands.&quot;
           </p>
         </div>
       </div>
@@ -140,7 +141,9 @@ export default function LoginPage() {
               type="email"
               placeholder="email@example.com"
               value={email}
-              onChange={(e : React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
               required
             />
 

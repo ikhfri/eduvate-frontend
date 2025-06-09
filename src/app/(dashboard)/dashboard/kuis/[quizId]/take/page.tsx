@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/kuis/[quizId]/take/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -45,7 +44,24 @@ import Image from "next/image";
 import { useTabMonitor } from "@/hooks/useTabMonitor";
 import { cn } from "@/lib/utils";
 
-// Interface for questions
+// Interface untuk attempt
+interface QuizAttempt {
+  id: string;
+  status: "IN_PROGRESS" | "COMPLETED";
+  progress: {
+    answers: {
+      [questionId: string]: {
+        selectedOptionIndex?: number;
+        answerText?: string;
+        isAnswered: boolean;
+      };
+    };
+  } | null;
+  timeLeftInSeconds: number | null;
+  violationCount: number;
+}
+
+// Interface untuk soal
 interface QuestionToTake {
   id: string;
   text: string;
@@ -54,24 +70,26 @@ interface QuestionToTake {
   imageUrl?: string | null;
 }
 
-// Interface for the quiz
+// Interface untuk kuis
 interface QuizToTake {
   id: string;
   title: string;
   description?: string | null;
   duration?: number | null;
   questions: QuestionToTake[];
+  attempt: QuizAttempt;
 }
 
-// Interface for student answers
+// Interface untuk jawaban siswa
 interface StudentAnswer {
   questionId: string;
-  answer: string;
+  selectedOptionIndex?: number;
+  answerText?: string;
 }
 
-const VISIBILITY_CHANGE_LIMIT = 5;
+const VISIBILITY_CHANGE_LIMIT = 7;
 
-// Updated QuestionMap Component
+// Komponen QuestionMap
 const QuestionMap = ({
   totalQuestions,
   currentQuestionIndex,
@@ -97,7 +115,9 @@ const QuestionMap = ({
         const questionId = questions[index]?.id;
         const isAnswered =
           answers.has(questionId) &&
-          answers.get(questionId)?.answer.trim() !== "";
+          (answers.get(questionId)?.selectedOptionIndex !== undefined ||
+            (answers.get(questionId)?.answerText &&
+              answers.get(questionId)?.answerText?.trim() !== ""));
         const isCurrent = index === currentQuestionIndex;
 
         return (
@@ -107,12 +127,11 @@ const QuestionMap = ({
             size="icon"
             className={cn(
               "h-9 w-9 rounded-md font-bold transition-all duration-200",
-              isCurrent &&
-                "bg-primary text-primary-foreground ring-2 ring-primary/80 ring-offset-2 ring-offset-background",
-              !isCurrent &&
-                isAnswered &&
-                "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 hover:bg-green-200/80",
-              !isCurrent && !isAnswered && "bg-card hover:bg-muted"
+              isCurrent
+                ? "bg-primary text-primary-foreground ring-2 ring-primary-500 ring-offset-2 ring-offset-background"
+                : isAnswered
+                ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300 border-green-300 dark:border-green-700"
+                : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
             )}
             onClick={() => onSelectQuestion(index)}
           >
@@ -124,7 +143,7 @@ const QuestionMap = ({
   </Card>
 );
 
-// New Component for the Information Panel
+// Komponen QuizInfoPanel
 const QuizInfoPanel = ({
   timeLeft,
   formatTime,
@@ -153,22 +172,22 @@ const QuizInfoPanel = ({
         {timeLeft !== null && (
           <div
             className={cn(
-              "flex items-center justify-between gap-2 p-3 rounded-lg font-semibold text-lg",
+              "flex items-center justify-between gap-2 p-3 rounded-lg font-semibold",
               timeLeft > 60
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
-                : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 animate-pulse"
+                ? "bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300"
+                : "bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 animate-pulse"
             )}
           >
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+              <Clock className="h-4 w-4" />
               <span>Sisa Waktu</span>
             </div>
             <span>{formatTime(timeLeft)}</span>
           </div>
         )}
-        <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 font-semibold">
+        <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-semibold">
           <div className="flex items-center gap-2">
-            <EyeOff className="h-5 w-5" />
+            <EyeOff className="h-4 w-4" />
             <span>Pelanggaran</span>
           </div>
           <span>
@@ -195,7 +214,10 @@ export default function TakeQuizPage() {
   const { user, loading: authLoading } = useAuth();
 
   const [quizData, setQuizData] = useState<QuizToTake | null>(null);
-  const [answers, setAnswers] = useState<Map<string, StudentAnswer>>(new Map());
+  const [attempt, setAttempt] = useState<QuizAttempt | null>(null);
+  const [answers, setAnswers] = useState<Map<string, StudentAnswer>>(
+    new Map()
+  );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -206,9 +228,57 @@ export default function TakeQuizPage() {
   const [violationCount, setViolationCount] = useState(0);
 
   const currentQuestion = useMemo(() => {
-    if (!quizData || quizData.questions.length === 0) return null;
+    if (!quizData || !Array.isArray(quizData.questions) || quizData.questions.length === 0) return null;
     return quizData.questions[currentQuestionIndex];
   }, [quizData, currentQuestionIndex]);
+
+  // Fungsi untuk menyimpan progres
+  const saveProgress = useCallback(async () => {
+    if (!attempt || isSubmitting || !quizData) return;
+    try {
+      const formattedAnswers = Array.from(answers.entries()).reduce(
+        (acc, [questionId, answer]) => ({
+          ...acc,
+          [questionId]: {
+            selectedOptionIndex: answer.selectedOptionIndex,
+            answerText: answer.answerText,
+            isAnswered: !!(
+              answer.selectedOptionIndex !== undefined ||
+              (answer.answerText && answer.answerText.trim() !== "")
+            ),
+          },
+        }),
+        {} as { [key: string]: { selectedOptionIndex?: number; answerText?: string; isAnswered: boolean } }
+      );
+
+      await axiosInstance.patch(`/quizzes/attempts/${attempt.id}/save-progress`, {
+        progress: { answers: formattedAnswers },
+        timeLeftInSeconds: timeLeft,
+        violationCount,
+      });
+    } catch (err: any) {
+      console.error("Failed to save progress:", err);
+      toast({
+        title: "Gagal Menyimpan Progres",
+        description: err.response?.data?.message || "Terjadi kesalahan saat menyimpan progres.",
+        variant: "destructive",
+      });
+    }
+  }, [attempt, answers, timeLeft, violationCount, quizData, toast, isSubmitting]);
+
+  // Simpan progres setiap 10 detik atau saat jawaban berubah
+  useEffect(() => {
+    if (!attempt || isSubmitting) return;
+    const interval = setInterval(() => {
+      saveProgress();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [attempt, isSubmitting, saveProgress]);
+
+  useEffect(() => {
+    if (!attempt || isSubmitting) return;
+    saveProgress();
+  }, [answers, attempt, isSubmitting, saveProgress]);
 
   const getParsedOptions = (
     options: QuestionToTake["options"]
@@ -217,7 +287,7 @@ export default function TakeQuizPage() {
     if (Array.isArray(options)) return options;
     if (typeof options === "string") {
       try {
-        const parsed = JSON.parse(options);
+        const parsed = JSON.parse(options)
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         console.error("Failed to parse options string:", options, e);
@@ -236,10 +306,10 @@ export default function TakeQuizPage() {
       setIsSubmitting(true);
       setShowSubmitConfirm(false);
 
-      if (!quizData) {
+      if (!quizData || !attempt) {
         toast({
           title: "Error",
-          description: "Data kuis tidak ditemukan.",
+          description: "Data kuis atau percobaan tidak ditemukan.",
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -247,45 +317,36 @@ export default function TakeQuizPage() {
       }
 
       try {
-        const formattedAnswers = Array.from(answers.values())
-          .map((studentAnswer) => {
-            const question = quizData.questions.find(
-              (q) => q.id === studentAnswer.questionId
-            );
-            if (!question) return null;
-            if (
-              question.type === "MULTIPLE_CHOICE" ||
+        const formattedAnswers = quizData.questions.map((question) => {
+          const answer = answers.get(question.id);
+          if (
+            question.type === "MULTIPLE_CHOICE" ||
+            question.type === "TRUE_FALSE"
+          ) {
+            const options =
               question.type === "TRUE_FALSE"
-            ) {
-              // For TRUE_FALSE, the options might not be in the question object itself
-              const options =
-                question.type === "TRUE_FALSE"
-                  ? [{ text: "Benar" }, { text: "Salah" }]
-                  : getParsedOptions(question.options);
+                ? [{ text: "Benar" }, { text: "Salah" }]
+                : getParsedOptions(question.options);
+            const selectedIndex = answer?.answerText
+              ? options.findIndex((opt) => opt.text === answer.answerText)
+              : -1;
+            return {
+              questionId: question.id,
+              selectedOptionIndex:
+                selectedIndex !== -1 ? selectedIndex : null,
+            };
+          } else if (question.type === "ESSAY") {
+            return {
+              questionId: question.id,
+              answerText: answer?.answerText || "",
+            };
+          }
+          return null;
+        }).filter((item): item is NonNullable<typeof item> => item !== null);
 
-              const selectedIndex = options.findIndex(
-                (opt) => opt.text === studentAnswer.answer
-              );
-
-              return {
-                questionId: studentAnswer.questionId,
-                selectedOptionIndex:
-                  selectedIndex !== -1 ? selectedIndex : null,
-              };
-            } else if (question.type === "ESSAY") {
-              return {
-                questionId: studentAnswer.questionId,
-                answerText: studentAnswer.answer,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean);
-
-        const submissionPayload = { answers: formattedAnswers };
         await axiosInstance.post(
           `/quizzes/${quizId}/attempt`,
-          submissionPayload
+          { answers: formattedAnswers }
         );
 
         toast({
@@ -302,13 +363,13 @@ export default function TakeQuizPage() {
         toast({
           title: "Gagal Mengirim Jawaban",
           description:
-            err.response?.data?.message || "Terjadi kesalahan server.",
+            err.response?.data?.message || "Terjadi kesalahan saat mengirim jawaban.",
           variant: "destructive",
         });
         setIsSubmitting(false);
       }
     },
-    [answers, quizData, quizId, router, toast, isSubmitting]
+    [answers, quizData, attempt, quizId, router, toast, isSubmitting]
   );
 
   const handleViolation = useCallback(
@@ -330,35 +391,46 @@ export default function TakeQuizPage() {
 
   useTabMonitor(handleLimitReached, VISIBILITY_CHANGE_LIMIT, handleViolation);
 
-  useEffect(() => {
-    if (quizData && quizData.duration && timeLeft === null) {
-      setTimeLeft(quizData.duration * 60);
-    }
-  }, [quizData, timeLeft]);
-
-  useEffect(() => {
-    if (timeLeft === 0) {
-      handleSubmitQuiz(true, "Waktu habis, jawaban Anda dikirim otomatis.");
-      return;
-    }
-    if (!timeLeft || isSubmitting) return;
-    const intervalId = setInterval(
-      () => setTimeLeft((prev) => (prev ? prev - 1 : 0)),
-      1000
-    );
-    return () => clearInterval(intervalId);
-  }, [timeLeft, isSubmitting, handleSubmitQuiz]);
-
   const fetchQuiz = useCallback(async () => {
     if (!quizId || !user) return;
     setIsLoading(true);
     try {
       const response = await axiosInstance.get(`/quizzes/${quizId}/take`);
-      setQuizData(response.data?.data || response.data);
+      const data: QuizToTake = response.data?.data || response.data;
+      if (!Array.isArray(data.questions)) {
+        console.warn("Backend returned invalid questions data:", data.questions);
+        setError("Kuis tidak memiliki soal yang valid.");
+        setQuizData(null);
+        return;
+      }
+      setQuizData({ ...data, questions: data.questions || [] });
+      setAttempt(data.attempt);
+      // Muat jawaban dari progress
+      if (data.attempt?.progress?.answers) {
+        const loadedAnswers = new Map<string, StudentAnswer>();
+        Object.entries(data.attempt.progress.answers).forEach(
+          ([questionId, answer]: [
+            string,
+            { selectedOptionIndex?: number; answerText?: string; isAnswered: boolean }
+          ]) => {
+            if (answer.isAnswered) {
+              loadedAnswers.set(questionId, {
+                questionId,
+                selectedOptionIndex: answer.selectedOptionIndex,
+                answerText: answer.answerText,
+              });
+            }
+          }
+        );
+        setAnswers(loadedAnswers);
+      }
+      setTimeLeft(data.attempt?.timeLeftInSeconds || (data.duration ? data.duration * 60 : null));
+      setViolationCount(data.attempt?.violationCount || 0);
     } catch (err: any) {
+      console.error("Fetch quiz error:", err);
       if (
         err.response?.status === 403 &&
-        err.response?.data?.message?.includes("sudah pernah mengerjakan")
+        err.response?.data?.message?.includes("sudah menyelesaikan")
       ) {
         setAlreadyTaken(true);
         setError(err.response.data.message);
@@ -376,8 +448,48 @@ export default function TakeQuizPage() {
     }
   }, [fetchQuiz, authLoading]);
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    setAnswers((prev) => new Map(prev).set(questionId, { questionId, answer }));
+  // Timer
+  useEffect(() => {
+    if (timeLeft === 0) {
+      handleSubmitQuiz(true, "Waktu habis, jawaban Anda dikirim otomatis.");
+      return;
+    }
+    if (!timeLeft || isSubmitting) return;
+    const intervalId = setInterval(
+      () => setTimeLeft((prev) => (prev ? prev - 1 : 0)),
+      1000
+    );
+    return () => clearInterval(intervalId);
+  }, [timeLeft, isSubmitting, handleSubmitQuiz]);
+
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers((prev) => {
+      const newAnswers = new Map(prev);
+      const question = quizData?.questions.find((q) => q.id === questionId);
+      if (!question) return prev;
+
+      if (
+        question.type === "MULTIPLE_CHOICE" ||
+        question.type === "TRUE_FALSE"
+      ) {
+        const options =
+          question.type === "TRUE_FALSE"
+            ? [{ text: "Benar" }, { text: "Salah" }]
+            : getParsedOptions(question.options);
+        const selectedIndex = options.findIndex((opt) => opt.text === value);
+        newAnswers.set(questionId, {
+          questionId,
+          selectedOptionIndex: selectedIndex !== -1 ? selectedIndex : undefined,
+          answerText: value,
+        });
+      } else if (question.type === "ESSAY") {
+        newAnswers.set(questionId, {
+          questionId,
+          answerText: value,
+        });
+      }
+      return newAnswers;
+    });
   };
 
   const formatTime = (seconds: number): string => {
@@ -393,11 +505,16 @@ export default function TakeQuizPage() {
     : [];
 
   const unansweredQuestionNumbers = useMemo(() => {
-    if (!quizData) return [];
+    if (!quizData || !Array.isArray(quizData.questions)) return [];
     return quizData.questions
       .map((q, index) => {
         const answerObj = answers.get(q.id);
-        if (!answerObj || !answerObj.answer || answerObj.answer.trim() === "") {
+        if (
+          !answerObj ||
+          (!answerObj.selectedOptionIndex &&
+            answerObj.selectedOptionIndex !== 0 &&
+            (!answerObj.answerText || answerObj.answerText.trim() === ""))
+        ) {
           return index + 1;
         }
         return null;
@@ -443,7 +560,7 @@ export default function TakeQuizPage() {
     );
   }
 
-  if (error || !quizData) {
+  if (error || !quizData || !attempt) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] text-center p-4">
         <AlertCircle className="h-16 w-16 text-destructive mb-4" />
@@ -513,7 +630,7 @@ export default function TakeQuizPage() {
                   <div className="space-y-4">
                     {currentQuestion.type === "MULTIPLE_CHOICE" && (
                       <RadioGroup
-                        value={answers.get(currentQuestion.id)?.answer}
+                        value={answers.get(currentQuestion.id)?.answerText || ""}
                         onValueChange={(value) =>
                           handleAnswerChange(currentQuestion.id, value)
                         }
@@ -522,7 +639,7 @@ export default function TakeQuizPage() {
                         {questionOptions.map((option, index) => {
                           const uniqueId = `q${currentQuestion.id}-opt${index}`;
                           const isChecked =
-                            answers.get(currentQuestion.id)?.answer ===
+                            answers.get(currentQuestion.id)?.answerText ===
                             option.text;
                           return (
                             <Label
@@ -553,7 +670,7 @@ export default function TakeQuizPage() {
                     )}
                     {currentQuestion.type === "TRUE_FALSE" && (
                       <RadioGroup
-                        value={answers.get(currentQuestion.id)?.answer}
+                        value={answers.get(currentQuestion.id)?.answerText || ""}
                         onValueChange={(value) =>
                           handleAnswerChange(currentQuestion.id, value)
                         }
@@ -562,7 +679,7 @@ export default function TakeQuizPage() {
                         {["Benar", "Salah"].map((optionText, index) => {
                           const uniqueId = `q${currentQuestion.id}-opt-${index}`;
                           const isChecked =
-                            answers.get(currentQuestion.id)?.answer ===
+                            answers.get(currentQuestion.id)?.answerText ===
                             optionText;
                           return (
                             <Label
@@ -596,7 +713,7 @@ export default function TakeQuizPage() {
                         placeholder="Ketik jawaban Anda di sini..."
                         rows={8}
                         className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 text-base focus:ring-primary"
-                        value={answers.get(currentQuestion.id)?.answer || ""}
+                        value={answers.get(currentQuestion.id)?.answerText || ""}
                         onChange={(e) =>
                           handleAnswerChange(currentQuestion.id, e.target.value)
                         }
@@ -678,7 +795,7 @@ export default function TakeQuizPage() {
                     <br />
                     <br />
                     Apakah Anda tetap yakin ingin menyelesaikan dan mengirim
-                    jawaban sekarang?
+                    jawaban?
                   </>
                 ) : (
                   <>
