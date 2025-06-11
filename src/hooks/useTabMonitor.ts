@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // hooks/useTabMonitor.ts
@@ -13,12 +12,14 @@ interface ViolationLog {
  * Custom hook untuk memonitor aktivitas siswa di desktop dan mobile, mencegah kecurangan selama ujian.
  * @param onLimitReached - Callback saat batas pelanggaran tercapai.
  * @param limit - Batas jumlah pelanggaran. Default 5.
- * @param onViolation - Callback opsional saat pelanggaran terdeteksi, menerima jumlah pelanggaran dan log.
+ * @param onViolation - Callback opsional saat pelanggaran terdeteksi.
+ * @param debug - Aktifkan logging debug untuk melacak event (default: false).
  */
 export function useTabMonitor(
   onLimitReached: () => void,
   limit = 5,
-  onViolation?: (count: number, log: ViolationLog) => void
+  onViolation?: (count: number, log: ViolationLog) => void,
+  debug: boolean = false
 ) {
   const counterRef = useRef(0);
   const lastViolationTime = useRef(0);
@@ -26,15 +27,22 @@ export function useTabMonitor(
   const isMobile = useRef(
     /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)
   );
+  const lastEventType = useRef<string | null>(null); // Untuk mencegah spam event yang sama
 
   const logViolation = useCallback(
     (type: string) => {
       const now = Date.now();
-      // Debounce untuk mencegah event ganda dalam 500ms
-      if (now - lastViolationTime.current < 500) {
+      // Debounce: cegah event dalam 1 detik dan event berulang yang sama
+      if (
+        now - lastViolationTime.current < 1000 ||
+        lastEventType.current === type
+      ) {
+        if (debug)
+          console.log(`Event ${type} dibatasi oleh debounce atau duplikasi`);
         return;
       }
       lastViolationTime.current = now;
+      lastEventType.current = type;
 
       counterRef.current += 1;
       const log: ViolationLog = { timestamp: now, type };
@@ -45,17 +53,19 @@ export function useTabMonitor(
         onViolation(counterRef.current, log);
       }
 
-      // Peringatan visual
-      alert(
-        `Peringatan: ${type} terdeteksi! Pelanggaran ke-${counterRef.current}.`
-      );
+      // Peringatan terkendali (hanya log di mobile, hindari alert berulang)
+      if (debug || !isMobile.current) {
+        console.warn(
+          `Peringatan: ${type} terdeteksi! Pelanggaran ke-${counterRef.current}.`
+        );
+      }
 
       // Periksa batas pelanggaran
       if (counterRef.current >= limit) {
         onLimitReached();
       }
     },
-    [onLimitReached, limit, onViolation]
+    [onLimitReached, limit, onViolation, debug]
   );
 
   const requestFullscreen = useCallback(async () => {
@@ -76,10 +86,9 @@ export function useTabMonitor(
         logViolation("Gagal masuk fullscreen di perangkat mobile");
       }
     }
-  }, []);
+  }, [logViolation]);
 
   useEffect(() => {
-    // Fungsi untuk memulai monitoring
     const startMonitoring = () => {
       requestFullscreen();
 
@@ -104,38 +113,35 @@ export function useTabMonitor(
       };
 
       const handleKeyDown = (event: KeyboardEvent) => {
-        // Blokir tombol berbahaya di desktop
-        if (!isMobile.current) {
-          const blockedKeys = [
-            "F12",
-            "Control+Shift+I",
-            "Control+Shift+J",
-            "Control+T",
-            "Control+W",
-            "Alt+Tab",
-            "Escape",
-          ];
+        if (isMobile.current) return; // Skip di mobile karena keyboard virtual
+        const blockedKeys = [
+          "F12",
+          "Control+Shift+I",
+          "Control+Shift+J",
+          "Control+T",
+          "Control+W",
+          "Alt+Tab",
+          "Escape",
+        ];
 
-          const isBlockedCombo =
-            (event.ctrlKey && ["t", "w", "Shift"].includes(event.key)) ||
-            (event.altKey && event.key === "Tab") ||
-            event.key === "F12" ||
-            (event.ctrlKey &&
-              event.shiftKey &&
-              ["I", "J"].includes(event.key)) ||
-            event.key === "Escape";
+        const isBlockedCombo =
+          (event.ctrlKey && ["t", "w", "Shift"].includes(event.key)) ||
+          (event.altKey && event.key === "Tab") ||
+          event.key === "F12" ||
+          (event.ctrlKey && event.shiftKey && ["I", "J"].includes(event.key)) ||
+          event.key === "Escape";
 
-          if (isBlockedCombo) {
-            event.preventDefault();
-            logViolation(`Tombol terlarang: ${event.key}`);
-          }
+        if (isBlockedCombo) {
+          event.preventDefault();
+          logViolation(`Tombol terlarang: ${event.key}`);
         }
       };
 
       const handleBlur = () => {
-        logViolation(
-          isMobile.current ? "Beralih aplikasi" : "Jendela kehilangan fokus"
-        );
+        if (!isMobile.current) {
+          // Hanya log di desktop, mobile ditangani oleh visibilitychange
+          logViolation("Jendela kehilangan fokus");
+        }
       };
 
       const handleContextMenu = (event: MouseEvent) => {
@@ -144,24 +150,11 @@ export function useTabMonitor(
       };
 
       const handleTouchStart = (event: TouchEvent) => {
-        // Deteksi multi-touch yang mencurigakan (misalnya, gesture untuk split-screen)
+        // Hanya deteksi multi-touch mencurigakan di mobile
         if (isMobile.current && event.touches.length > 2) {
           event.preventDefault();
           logViolation("Multi-touch mencurigakan");
         }
-      };
-
-      const handlePause = () => {
-        // Deteksi saat aplikasi di-background di mobile
-        if (isMobile.current) {
-          logViolation("Aplikasi di-background");
-        }
-      };
-
-      // Deteksi screenshot (eksperimental, tidak didukung semua browser)
-      const handleCopy = (event: ClipboardEvent) => {
-        event.preventDefault();
-        logViolation("Percobaan copy atau screenshot");
       };
 
       // Tambahkan event listener
@@ -176,10 +169,9 @@ export function useTabMonitor(
       document.addEventListener("MSFullscreenChange", handleFullscreenChange);
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("contextmenu", handleContextMenu);
-      document.addEventListener("touchstart", handleTouchStart);
-      document.addEventListener("pause", handlePause); // Mobile-specific
-      document.addEventListener("copy", handleCopy);
-      document.addEventListener("cut", handleCopy);
+      if (isMobile.current) {
+        document.addEventListener("touchstart", handleTouchStart);
+      }
 
       return () => {
         window.removeEventListener("blur", handleBlur);
@@ -205,18 +197,16 @@ export function useTabMonitor(
         );
         document.removeEventListener("keydown", handleKeyDown);
         document.removeEventListener("contextmenu", handleContextMenu);
-        document.removeEventListener("touchstart", handleTouchStart);
-        document.removeEventListener("pause", handlePause);
-        document.removeEventListener("copy", handleCopy);
-        document.removeEventListener("cut", handleCopy);
+        if (isMobile.current) {
+          document.removeEventListener("touchstart", handleTouchStart);
+        }
       };
     };
 
-    // Mulai monitoring (opsional: minta konfirmasi pengguna di mobile)
+    // Mulai monitoring, dengan konfirmasi di mobile
     if (isMobile.current) {
-      // Di mobile, minta konfirmasi untuk masuk fullscreen karena beberapa browser memerlukan interaksi pengguna
       const confirmed = confirm(
-        "Masuk ke mode ujian? Pastikan Anda menggunakan satu aplikasi tanpa gangguan."
+        "Masuk ke mode ujian? Pastikan tidak beralih aplikasi."
       );
       if (confirmed) {
         startMonitoring();
