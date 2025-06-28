@@ -246,7 +246,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
           <div className="text-center mt-3 pt-3 border-t border-border/50 dark:border-slate-800/50">
             <p className="text-xs text-muted-foreground/80">
-              © {new Date().getFullYear()} NEVTIK
+              LMS v1.0.6 - © {new Date().getFullYear()} NEVTIK
             </p>
           </div>
         </div>
