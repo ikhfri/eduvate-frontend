@@ -1,6 +1,5 @@
-// components/Sidebar.tsx
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -17,8 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import axiosInstance from "@/lib/axiosInstance";
 
-// Tipe data untuk link navigasi
 interface NavLinkItem {
   href: string;
   label: string;
@@ -26,21 +25,21 @@ interface NavLinkItem {
   activePaths?: string[];
 }
 
-// Tipe data untuk grup link
 interface NavGroup {
   title: string;
   links: NavLinkItem[];
 }
 
-// Komponen internal untuk merender satu link
 const NavLink = ({
   link,
   pathname,
   onClick,
+  notificationCount,
 }: {
   link: NavLinkItem;
   pathname: string;
   onClick: () => void;
+  notificationCount?: number;
 }) => {
   const isActive =
     pathname === link.href ||
@@ -53,8 +52,7 @@ const NavLink = ({
         href={link.href}
         onClick={onClick}
         className={cn(
-          "flex items-center p-3 my-1 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors duration-200 group relative",
-          isActive && "text-primary"
+          "flex items-center p-3 my-1 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors duration-200 group relative"
         )}
       >
         <div
@@ -65,11 +63,16 @@ const NavLink = ({
         />
         <link.icon
           className={cn(
-            "w-5 h-5 transition duration-75",
-            isActive && "text-primary"
+            "w-5 h-5 transition-all duration-200 group-hover:scale-110",
+            isActive && "text-primary scale-110"
           )}
         />
         <span className="ms-4 font-semibold">{link.label}</span>
+        {typeof notificationCount === "number" && notificationCount > 0 && (
+          <span className="ms-auto flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white animate-pulse">
+            {notificationCount}
+          </span>
+        )}
       </Link>
     </li>
   );
@@ -84,6 +87,26 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+
+  const [pendingCounts, setPendingCounts] = useState({ tasks: 0, quizzes: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (user?.role === "STUDENT") {
+        try {
+          const res = await axiosInstance.get("/stats");
+          const stats = res.data?.data || {};
+          setPendingCounts({
+            tasks: stats.activeTasks || 0,
+            quizzes: stats.availableQuizzes || 0,
+          });
+        } catch (err) {
+          console.error("Gagal mengambil stats:", err);
+        }
+      }
+    };
+    fetchStats();
+  }, [user]);
 
   const navGroups: NavGroup[] = [
     {
@@ -161,14 +184,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   return (
     <>
-      {/* Menambahkan style untuk menyembunyikan scrollbar */}
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
         .no-scrollbar {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
 
@@ -190,7 +212,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <div className="flex flex-col items-center justify-center pt-6 pb-4 px-4 flex-shrink-0">
           <Link href="/dashboard" className="flex flex-row items-center gap-2">
             <Image height={65} width={65} src="/icon.png" alt="logo" />
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <span className="text-xl font-bold text-foreground whitespace-nowrap">
                 NEVTIK
               </span>
@@ -201,7 +223,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </Link>
         </div>
 
-        {/* Menambahkan class 'no-scrollbar' ke elemen nav */}
         <nav className="flex-grow px-4 overflow-y-auto no-scrollbar">
           {navGroups.map((group) => (
             <div key={group.title} className="mb-4">
@@ -209,14 +230,26 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 {group.title}
               </h3>
               <ul className="space-y-1">
-                {group.links.map((link) => (
-                  <NavLink
-                    key={link.href}
-                    link={link}
-                    pathname={pathname}
-                    onClick={() => setIsOpen(false)}
-                  />
-                ))}
+                {group.links.map((link) => {
+                  let count = 0;
+                  if (user?.role === "STUDENT") {
+                    if (link.href === "/dashboard/tugas") {
+                      count = pendingCounts.tasks;
+                    } else if (link.href === "/dashboard/kuis") {
+                      count = pendingCounts.quizzes;
+                    }
+                  }
+
+                  return (
+                    <NavLink
+                      key={link.href}
+                      link={link}
+                      pathname={pathname}
+                      onClick={() => setIsOpen(false)}
+                      notificationCount={count}
+                    />
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -243,10 +276,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               <LogOut className="w-5 h-5" />
             </button>
           </div>
-
           <div className="text-center mt-3 pt-3 border-t border-border/50 dark:border-slate-800/50">
             <p className="text-xs text-muted-foreground/80">
-              LMS v1.0.6 - © {new Date().getFullYear()} NEVTIK
+              LMS v1.0.7 - © {new Date().getFullYear()} NEVTIK
             </p>
           </div>
         </div>

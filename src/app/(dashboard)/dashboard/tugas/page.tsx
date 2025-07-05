@@ -17,7 +17,6 @@ import { id as LocaleID } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
-
   BookText,
   CalendarClock,
   UserCircle2,
@@ -25,6 +24,8 @@ import {
   Award,
   PlusCircle,
   ArrowRight,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { fetchApi } from "@/lib/fetchApi";
@@ -47,7 +48,7 @@ interface Task {
   mySubmission?: MySubmission | null;
 }
 
-// --- KOMPONEN KARTU TUGAS BARU ---
+// Komponen Kartu Tugas dengan Animasi Dinamis
 const TaskCard = ({
   task,
   statusBadge,
@@ -57,36 +58,37 @@ const TaskCard = ({
   statusBadge: JSX.Element;
   ctaButton: JSX.Element;
 }) => (
-  <div className="bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1.5">
-    {/* BAGIAN HEADER BARU DENGAN GRADIENT */}
-    <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-700 text-white relative">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10"></div>
+  <div className="bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 animate-bounce-in relative">
+  
+    {/* Header dengan Gradient dan Animasi */}
+    <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-700 text-white relative animate-fade-in">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10 animate-pulse-slow"></div>
       <div className="relative z-10">
-        <h3 className="text-lg font-bold line-clamp-2 leading-tight drop-shadow-sm">
+        <h3 className="text-lg font-bold line-clamp-2 leading-tight drop-shadow-sm animate-text-pop">
           {task.title}
         </h3>
         <div className="flex items-center text-xs text-white/80 pt-2">
-          <UserCircle2 className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+          <UserCircle2 className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 animate-wiggle" />
           Dibuat oleh: {task.author?.name || "N/A"}
         </div>
       </div>
     </div>
 
-    {/* BAGIAN KONTEN (TETAP BERSIH AGAR MUDAH DIBACA) */}
+    {/* Konten dengan Efek Bersih dan Animasi */}
     <div className="p-5 flex-grow">
-      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+      <p className="text-sm text-muted-foreground line-clamp-3 mb-4 animate-slide-in">
         {task.description || "Tidak ada deskripsi."}
       </p>
       <div className="space-y-2 text-sm text-foreground">
-        <div className="flex items-center gap-2.5">
-          <CalendarClock className="w-4 h-4 text-green-500 flex-shrink-0" />
+        <div className="flex items-center gap-2.5 animate-slide-in [animation-delay:0.1s]">
+          <CalendarClock className="w-4 h-4 text-green-500 flex-shrink-0 animate-bounce-slow" />
           <span className="font-medium">Mulai:</span>
           <span className="text-muted-foreground">
             {formatDateSafe(task.submissionStartDate, "dd MMM yyyy, HH:mm")}
           </span>
         </div>
-        <div className="flex items-center gap-2.5">
-          <CalendarClock className="w-4 h-4 text-red-500 flex-shrink-0" />
+        <div className="flex items-center gap-2.5 animate-slide-in [animation-delay:0.2s]">
+          <CalendarClock className="w-4 h-4 text-red-500 flex-shrink-0 animate-bounce-slow" />
           <span className="font-medium">Deadline:</span>
           <span className="text-muted-foreground">
             {formatDateSafe(task.deadline, "dd MMM yyyy, HH:mm")}
@@ -95,7 +97,7 @@ const TaskCard = ({
       </div>
     </div>
 
-    {/* BAGIAN FOOTER */}
+    {/* Footer dengan Interaksi */}
     <div className="flex justify-between items-center border-t border-border p-4 bg-secondary/20 mt-auto">
       {statusBadge}
       {ctaButton}
@@ -114,6 +116,7 @@ export default function StudentTaskListPage() {
   const [error, setError] = useState<string | null>(null);
   const { user, loading: authLoading, token } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -140,11 +143,10 @@ export default function StudentTaskListPage() {
       if (user) {
         fetchTasks();
       } else {
-        const router = useRouter();
         router.push("/login");
       }
     }
-  }, [user, authLoading, toast, token]);
+  }, [user, authLoading, toast, token, router]);
 
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -160,7 +162,7 @@ export default function StudentTaskListPage() {
 
   const getTaskStatusBadge = (task: Task) => {
     const baseClasses =
-      "text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5";
+      "text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse-slow";
     if (user?.role === "STUDENT" && task.mySubmission) {
       if (typeof task.mySubmission.grade === "number") {
         const grade = task.mySubmission.grade;
@@ -169,7 +171,7 @@ export default function StudentTaskListPage() {
             <div
               className={`${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300`}
             >
-              <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+              <Award className="h-3.5 w-3.5 animate-wiggle" /> Nilai: {grade}
             </div>
           );
         if (grade >= 70)
@@ -177,14 +179,14 @@ export default function StudentTaskListPage() {
             <div
               className={`${baseClasses} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300`}
             >
-              <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+              <Award className="h-3.5 w-3.5 animate-wiggle" /> Nilai: {grade}
             </div>
           );
         return (
           <div
             className={`${baseClasses} bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300`}
           >
-            <Award className="h-3.5 w-3.5" /> Nilai: {grade}
+            <Award className="h-3.5 w-3.5 animate-wiggle" /> Nilai: {grade}
           </div>
         );
       }
@@ -192,7 +194,7 @@ export default function StudentTaskListPage() {
         <div
           className={`${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300`}
         >
-          Sudah Dikumpulkan
+          <Sparkles className="h-3.5 w-3.5 animate-twinkle" /> Sudah Dikumpulkan
         </div>
       );
     }
@@ -251,45 +253,74 @@ export default function StudentTaskListPage() {
     );
   };
 
-  if (isLoading) {
-    /* ... Tampilan Loading ... */
-  }
-  if (error) {
-    /* ... Tampilan Error ... */
-  }
-
   return (
     <ProtectedRoute allowedRoles={["STUDENT", "ADMIN", "MENTOR"]}>
-      <div className="space-y-8">
-        <div className="relative p-8 rounded-2xl shadow-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white overflow-hidden">
-          <BookText className="absolute -right-8 -bottom-8 h-48 w-48 text-white/10" />
+      <div className="space-y-8 relative">
+        {/* Animated Background Bubbles */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute w-4 h-4 bg-blue-300 rounded-full animate-bubble bubble-1" />
+          <div className="absolute w-6 h-6 bg-pink-300 rounded-full animate-bubble bubble-2" />
+          <div className="absolute w-5 h-5 bg-yellow-300 rounded-full animate-bubble bubble-3" />
+          <div className="absolute w-3 h-3 bg-green-300 rounded-full animate-bubble bubble-4" />
+        </div>
+
+        {/* Header dengan Animasi */}
+        <div className="relative p-8 rounded-2xl shadow-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white overflow-hidden animate-bounce-in">
+          <BookText className="absolute -right-8 -bottom-8 h-48 w-48 text-white/10 animate-pulse-slow" />
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-4xl font-bold">Daftar Tugas</h1>
-              <p className="mt-2 text-white/80">
-                Lihat, kerjakan, dan lacak semua tugas Anda di sini.
+              <h1 className="text-4xl font-bold animate-text-glow">
+                Daftar Tugas
+              </h1>
+              <p className="mt-2 text-white/80 animate-fade-in">
+                Jelajahi dan selesaikan tugas seru di sini!
               </p>
             </div>
             {(user?.role === "ADMIN" || user?.role === "MENTOR") && (
               <Link
                 href="/dashboard/manage-tugas/new"
-                className="inline-flex items-center gap-2 px-4 py-2 font-semibold bg-white/90 text-primary rounded-lg shadow-sm hover:bg-white transition-colors flex-shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 font-semibold bg-white/90 text-primary rounded-lg shadow-sm hover:bg-white transition-colors flex-shrink-0 animate-pulse-slow"
               >
-                <PlusCircle className="w-5 h-5" />
+                <PlusCircle className="w-5 h-5 animate-wiggle" />
                 Tambah Tugas Baru
               </Link>
             )}
           </div>
         </div>
 
-        {sortedTasks.length === 0 ? (
-          <div className="text-center p-16 bg-card rounded-xl border-2 border-dashed border-border">
+        {/* Motivational Quote */}
+        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in relative overflow-hidden">
+         
+          <Sparkles className="h-6 w-6 animate-bounce-slow" />
+          <p className="text-sm font-medium animate-text-glow">
+            Setiap tugas adalah petualangan baru menuju kesuksesan!
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center p-16 bg-card rounded-xl border-2 border-dashed border-border animate-pulse">
+            <Loader2 className="mx-auto h-16 w-16 text-primary animate-spin" />
+            <h3 className="text-2xl font-semibold text-foreground mt-4">
+              Memuat Tugas...
+            </h3>
+          </div>
+        ) : error ? (
+          <div className="text-center p-16 bg-card rounded-xl border-2 border-dashed border-border animate-pulse">
             <Info className="mx-auto h-16 w-16 text-primary/50 mb-4" />
             <h3 className="text-2xl font-semibold text-foreground">
+              Gagal Memuat Tugas
+            </h3>
+            <p className="mt-2 text-muted-foreground">{error}</p>
+          </div>
+        ) : sortedTasks.length === 0 ? (
+          <div className="text-center p-16 bg-card rounded-xl border-2 border-dashed border-border animate-bounce-in">
+            <Info className="mx-auto h-16 w-16 text-primary/50 mb-4 animate-wiggle" />
+            <h3 className="text-2xl font-semibold text-foreground animate-text-pop">
               Belum Ada Tugas
             </h3>
-            <p className="mt-2 text-muted-foreground">
-              Saat ini belum ada tugas yang tersedia.
+            <p className="mt-2 text-muted-foreground animate-fade-in">
+              Saat ini belum ada tugas yang tersedia. Ayo tunggu petualangan
+              berikutnya!
             </p>
           </div>
         ) : (
@@ -298,7 +329,7 @@ export default function StudentTaskListPage() {
               const ctaButton = (
                 <Link
                   href={`/dashboard/tugas/${task.id}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors animate-pulse-slow"
                 >
                   <span>
                     {user?.role === "STUDENT" &&
@@ -308,10 +339,10 @@ export default function StudentTaskListPage() {
                       : user?.role === "STUDENT" && task.mySubmission
                       ? "Lihat Status"
                       : user?.role === "STUDENT"
-                      ? "Kerjakan"
+                      ? "Kerjakan Sekarang"
                       : "Lihat Detail"}
                   </span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 animate-bounce-slow" />
                 </Link>
               );
               return (
@@ -326,6 +357,158 @@ export default function StudentTaskListPage() {
           </div>
         )}
       </div>
+      <style jsx global>{`
+        @keyframes bounceIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes slideIn {
+          0% {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes textPop {
+          0% {
+            transform: scale(0.9);
+          }
+          50% {
+            transform: scale(1.2);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        @keyframes textGlow {
+          0%,
+          100% {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+          }
+          50% {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+          }
+        }
+        @keyframes pulseSlow {
+          0%,
+          100% {
+            opacity: 0.6;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+        @keyframes wiggle {
+          0%,
+          100% {
+            transform: rotate(-5deg);
+          }
+          50% {
+            transform: rotate(5deg);
+          }
+        }
+        @keyframes bounceSlow {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+        @keyframes twinkle {
+          0%,
+          100% {
+            opacity: 0.4;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        @keyframes bubble {
+          0% {
+            transform: translateY(100vh) scale(0.5);
+            opacity: 0.2;
+          }
+          100% {
+            transform: translateY(-100vh) scale(1);
+            opacity: 0.8;
+          }
+        }
+
+        .animate-bounce-in {
+          animation: bounceIn 0.8s ease-out forwards;
+        }
+        .animate-slide-in {
+          animation: slideIn 0.8s ease-out forwards;
+        }
+        .animate-fade-in {
+          animation: fadeIn 1s ease-out forwards;
+        }
+        .animate-text-pop {
+          animation: textPop 0.5s ease-out forwards;
+        }
+        .animate-text-glow {
+          animation: textGlow 2s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulseSlow 3s ease-in-out infinite;
+        }
+        .animate-wiggle {
+          animation: wiggle 1.5s ease-in-out infinite;
+        }
+        .animate-bounce-slow {
+          animation: bounceSlow 2s ease-in-out infinite;
+        }
+        .animate-twinkle {
+          animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .bubble-1 {
+          left: 10%;
+          animation: bubble 10s linear infinite;
+          animation-delay: 0s;
+        }
+        .bubble-2 {
+          left: 30%;
+          animation: bubble 14s linear infinite;
+          animation-delay: 3s;
+        }
+        .bubble-3 {
+          left: 60%;
+          animation: bubble 12s linear infinite;
+          animation-delay: 6s;
+        }
+        .bubble-4 {
+          left: 80%;
+          animation: bubble 16s linear infinite;
+          animation-delay: 9s;
+        }
+      `}</style>
     </ProtectedRoute>
   );
 }

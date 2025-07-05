@@ -1,4 +1,4 @@
-// app/(dashboard)/dashboard/page.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -22,10 +22,11 @@ import {
   Sunset,
   Moon,
   Award,
-  Star,
+  Sparkles,
+  
 } from "lucide-react";
 
-// Komponen Kartu Statistik Gradien
+// Komponen Kartu Statistik Gradien dengan Animasi Dinamis
 const StatCard = ({
   title,
   value,
@@ -38,28 +39,29 @@ const StatCard = ({
   value: number | string;
   icon: React.ElementType;
   loading: boolean;
-  color: "blue" | "green" | "purple";
+  color: "blue" | "green" | "purple" | "pink";
   description: string;
 }) => {
   const colorVariants = {
     blue: "from-blue-500 to-blue-600",
     green: "from-green-500 to-green-600",
     purple: "from-purple-500 to-purple-600",
+    pink: "from-pink-500 to-pink-600",
   };
   return (
     <div
-      className={`bg-gradient-to-br ${colorVariants[color]} text-white p-6 rounded-2xl shadow-lg relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+      className={`bg-gradient-to-br ${colorVariants[color]} text-white p-6 rounded-2xl shadow-lg relative overflow-hidden transition-all duration-300 hover:scale-110 hover:shadow-2xl animate-bounce-in`}
     >
-      <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/20" />
+      <Icon className="absolute -right-4 -bottom-4 h-28 w-28 text-white/20 animate-pulse-slow" />
       <div className="relative z-10">
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-lg">
+          <div className="bg-white/20 p-2 rounded-lg animate-wiggle">
             <Icon className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold">{title}</h3>
+          <h3 className="text-lg font-semibold animate-text-pop">{title}</h3>
         </div>
         <div className="mt-4">
-          <p className="text-5xl font-bold">
+          <p className="text-5xl font-bold animate-count-up">
             {loading ? <Loader2 className="animate-spin h-10 w-10" /> : value}
           </p>
           <p className="text-sm opacity-80 mt-1">{description}</p>
@@ -69,7 +71,7 @@ const StatCard = ({
   );
 };
 
-// Komponen Kartu Aksi Berwarna
+// Komponen Kartu Aksi Berwarna dengan Efek Interaktif
 const ActionCard = ({
   title,
   description,
@@ -81,30 +83,89 @@ const ActionCard = ({
   description: string;
   icon: React.ElementType;
   onClick: () => void;
-  color: "blue" | "green";
+  color: "blue" | "green" | "yellow";
 }) => {
   const colorVariants = {
     blue: "bg-blue-500 hover:bg-blue-600",
     green: "bg-green-500 hover:bg-green-600",
+    yellow: "bg-yellow-500 hover:bg-yellow-600",
   };
   return (
     <div
       onClick={onClick}
-      className={`${colorVariants[color]} text-white p-6 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden`}
+      className={`${colorVariants[color]} text-white p-6 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-3 group relative overflow-hidden animate-slide-in`}
     >
-      <Icon className="absolute -right-4 -bottom-4 h-24 w-24 text-white/10" />
+      <Icon className="absolute -right-4 -bottom-4 h-24 w-24 text-white/10 group-hover:animate-spin-slow" />
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-2">
-          <div className="bg-white/20 p-2 rounded-lg">
+          <div className="bg-white/20 p-2 rounded-lg group-hover:animate-bounce">
             <Icon className="h-5 w-5" />
           </div>
-          <h4 className="text-lg font-bold">{title}</h4>
+          <h4 className="text-lg font-bold animate-text-pop">{title}</h4>
         </div>
         <p className="text-sm text-white/80">{description}</p>
         <div className="absolute top-4 right-4 bg-white/20 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <ArrowRight className="h-4 w-4" />
         </div>
       </div>
+    </div>
+  );
+};
+
+// Komponen Motivational Quote dengan Efek Konfeti
+const MotivationalQuote = () => {
+  const quotes = [
+    "Belajar adalah petualangan seru setiap hari!",
+    "Langkah kecil hari ini menuju kesuksesan besar!",
+    "Ilmu adalah kunci untuk membuka mimpimu!",
+    "Terus berusaha, kamu pasti bisa!",
+    "Setiap tantangan adalah kesempatan belajar!",
+  ];
+  const [quote, setQuote] = useState(quotes[0]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in relative overflow-hidden">
+    
+      <Sparkles className="h-6 w-6 animate-bounce-slow" />
+      <p className="text-sm font-medium animate-text-glow">{quote}</p>
+    </div>
+  );
+};
+
+// Komponen Progress Tracker untuk Siswa
+const ProgressTracker = ({
+  completedTasks,
+  totalTasks,
+}: {
+  completedTasks: number;
+  totalTasks: number;
+}) => {
+  const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  return (
+    <div className="bg-card border border-border rounded-xl p-6 shadow-lg animate-bounce-in">
+      <div className="flex items-center gap-3 mb-4">
+        <Award className="h-6 w-6 text-yellow-500 animate-wiggle" />
+        <h3 className="text-xl font-semibold animate-text-pop">
+          Progres Belajar
+        </h3>
+      </div>
+      <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="absolute h-full bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 transition-all duration-1000 animate-pulse-slow"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <p className="text-sm text-muted-foreground mt-2">
+        {completedTasks} dari {totalTasks} tugas selesai ({Math.round(progress)}
+        %)
+      </p>
     </div>
   );
 };
@@ -143,7 +204,7 @@ export default function DashboardPage() {
       return {
         text: "Selamat Pagi",
         Icon: Sun,
-        gradient: "from-sky-400 via-blue-500 to-indigo-600",
+        gradient: "from-yellow-400 via-orange-400 to-pink-500",
         animationClass: "animate-sunrise",
         skyObject: "sun",
       };
@@ -152,7 +213,7 @@ export default function DashboardPage() {
       return {
         text: "Selamat Siang",
         Icon: CloudSun,
-        gradient: "from-sky-500 to-cyan-500",
+        gradient: "from-cyan-400 via-sky-400 to-blue-500",
         animationClass: "animate-day",
         skyObject: "sun",
       };
@@ -161,7 +222,7 @@ export default function DashboardPage() {
       return {
         text: "Selamat Sore",
         Icon: Sunset,
-        gradient: "from-orange-500 via-red-500 to-purple-700",
+        gradient: "from-orange-500 via-red-400 to-purple-500",
         animationClass: "animate-sunset",
         skyObject: "sun",
       };
@@ -169,7 +230,7 @@ export default function DashboardPage() {
     return {
       text: "Selamat Malam",
       Icon: Moon,
-      gradient: "from-gray-800 via-gray-900 to-black",
+      gradient: "from-indigo-800 via-purple-800 to-black",
       animationClass: "animate-moon",
       skyObject: "moon",
     };
@@ -185,21 +246,27 @@ export default function DashboardPage() {
 
   const renderStudentDashboard = () => (
     <>
+      <MotivationalQuote />
+      <ProgressTracker
+        completedTasks={stats.completedTasks ?? 0}
+        totalTasks={(stats.activeTasks ?? 0) + (stats.completedTasks ?? 0)}
+      />
       <div className="space-y-4">
-        <h3 className="text-2xl font-semibold text-foreground flex items-center gap-2">
-          <GraduationCap className="h-6 w-6" /> Aktivitas Belajar
+        <h3 className="text-2xl font-semibold text-foreground flex items-center gap-2 animate-text-pop">
+          <GraduationCap className="h-6 w-6 text-blue-500 animate-wiggle" />{" "}
+          Aktivitas Belajar
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ActionCard
             title="Tugas Harian"
-            description="Lihat dan selesaikan tugas dari mentor."
+            description="Jelajahi tugas seru dari mentor!"
             icon={ClipboardList}
             onClick={() => router.push("/dashboard/tugas")}
             color="blue"
           />
           <ActionCard
             title="Kuis & Latihan"
-            description="Uji pemahamanmu lewat kuis interaktif."
+            description="Tantang dirimu dengan kuis asyik!"
             icon={BookCheck}
             onClick={() => router.push("/dashboard/kuis")}
             color="green"
@@ -213,7 +280,7 @@ export default function DashboardPage() {
           icon={ClipboardList}
           loading={loadingStats}
           color="blue"
-          description="Tugas yang perlu kamu kerjakan."
+          description="Tugas seru yang menunggumu!"
         />
         <StatCard
           title="Kuis Tersedia"
@@ -221,15 +288,15 @@ export default function DashboardPage() {
           icon={BookCheck}
           loading={loadingStats}
           color="green"
-          description="Kuis yang siap untuk diuji."
+          description="Kuis asyik untuk diuji!"
         />
         <StatCard
           title="Tugas Selesai"
           value={stats.completedTasks ?? 0}
           icon={Award}
           loading={loadingStats}
-          color="purple"
-          description="Tugas yang telah kamu kumpulkan."
+          color="pink"
+          description="Tugas yang telah kamu taklukkan!"
         />
       </div>
     </>
@@ -237,26 +304,28 @@ export default function DashboardPage() {
 
   const renderAdminMentorDashboard = () => (
     <>
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <MotivationalQuote />
+      <div className="bg-card border border-border rounded-xl overflow-hidden animate-bounce-in">
         <div className="p-4 bg-primary/10 border-b border-border">
-          <h3 className="text-xl font-semibold text-foreground">
-            Panel Pengelolaan
+          <h3 className="text-xl font-semibold text-foreground flex items-center gap-2 animate-text-pop">
+            <UserCog className="h-6 w-6 text-purple-500 animate-wiggle" /> Panel
+            Pengelolaan
           </h3>
         </div>
         <div className="p-6">
           <ul className="space-y-4 text-muted-foreground">
-            <li className="flex items-center gap-3">
-              <FilePenLine className="h-5 w-5 text-primary" />
-              <span>Kelola tugas dan materi pembelajaran.</span>
+            <li className="flex items-center gap-3 hover:text-primary transition-colors animate-slide-in">
+              <FilePenLine className="h-5 w-5 text-primary animate-bounce-slow" />
+              <span>Buat tugas seru dan materi belajar.</span>
             </li>
-            <li className="flex items-center gap-3">
-              <ListChecks className="h-5 w-5 text-primary" />
-              <span>Kelola kuis dan hasil peserta.</span>
+            <li className="flex items-center gap-3 hover:text-primary transition-colors animate-slide-in [animation-delay:0.2s]">
+              <ListChecks className="h-5 w-5 text-primary animate-bounce-slow" />
+              <span>Kelola kuis dan lihat progres siswa.</span>
             </li>
             {user?.role === "ADMIN" && (
-              <li className="flex items-center gap-3">
-                <UserCog className="h-5 w-5 text-primary" />
-                <span>Kelola semua pengguna sistem.</span>
+              <li className="flex items-center gap-3 hover:text-primary transition-colors animate-slide-in [animation-delay:0.4s]">
+                <UserCog className="h-5 w-5 text-primary animate-bounce-slow" />
+                <span>Atur pengguna dan peran sistem.</span>
               </li>
             )}
           </ul>
@@ -280,12 +349,12 @@ export default function DashboardPage() {
           description="Kuis interaktif yang tersedia."
         />
         <StatCard
-          title="Pengguna Terdaftar"
+          title="Pengguna Aktif"
           value={stats.users ?? 0}
           icon={Users}
           loading={loadingStats}
           color="purple"
-          description="Seluruh pengguna dalam sistem."
+          description="Pengguna yang aktif di sistem."
         />
       </div>
     </>
@@ -293,40 +362,49 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-8">
+      <div className="space-y-8 relative">
+        {/* Animated Background Bubbles */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute w-4 h-4 bg-blue-300 rounded-full animate-bubble bubble-1" />
+          <div className="absolute w-6 h-6 bg-pink-300 rounded-full animate-bubble bubble-2" />
+          <div className="absolute w-5 h-5 bg-yellow-300 rounded-full animate-bubble bubble-3" />
+          <div className="absolute w-3 h-3 bg-green-300 rounded-full animate-bubble bubble-4" />
+        </div>
         {user && (
           <div
-            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient}`}
+            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient} animate-bounce-in`}
           >
             <div
               className={`absolute w-24 h-24 rounded-full ${animationClass} z-0`}
             >
               {skyObject === "sun" && (
-                <div className="w-full h-full bg-yellow-300 rounded-full shadow-[0_0_40px_10px_rgba(253,224,71,0.5)]" />
+                <div className="w-full h-full bg-yellow-300 rounded-full shadow-[0_0_40px_15px_rgba(253,224,71,0.6)] animate-pulse-slow" />
               )}
               {skyObject === "moon" && (
-                <div className="w-full h-full bg-slate-200 rounded-full shadow-[0_0_30px_5px_rgba(226,232,240,0.4)]" />
+                <div className="w-full h-full bg-slate-200 rounded-full shadow-[0_0_30px_10px_rgba(226,232,240,0.5)] animate-pulse-slow" />
               )}
             </div>
             {skyObject === "moon" && (
               <>
-                <Star className="absolute top-[20%] left-[15%] h-3 w-3 text-white/70 animate-pulse" />
-                <Star className="absolute top-[30%] left-[80%] h-2 w-2 text-white/70 animate-pulse [animation-delay:0.5s]" />
-                <Star className="absolute top-[60%] left-[50%] h-4 w-4 text-white/70 animate-pulse [animation-delay:1s]" />
-                <Star className="absolute top-[80%] left-[25%] h-2 w-2 text-white/70 animate-pulse [animation-delay:1.5s]" />
+                <Sparkles className="absolute top-[15%] left-[10%] h-4 w-4 text-white/70 animate-twinkle" />
+                <Sparkles className="absolute top-[25%] left-[75%] h-3 w-3 text-white/70 animate-twinkle [animation-delay:0.3s]" />
+                <Sparkles className="absolute top-[50%] left-[40%] h-5 w-5 text-white/70 animate-twinkle [animation-delay:0.6s]" />
+                <Sparkles className="absolute top-[70%] left-[20%] h-3 w-3 text-white/70 animate-twinkle [animation-delay:0.9s]" />
               </>
             )}
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
-                <GreetingIcon className="h-8 w-8" />
-                <p className="text-2xl font-semibold">{greeting},</p>
+                <GreetingIcon className="h-8 w-8 animate-wiggle" />
+                <p className="text-2xl font-semibold animate-text-pop">
+                  {greeting},
+                </p>
               </div>
-              <h1 className="text-4xl font-bold">
+              <h1 className="text-4xl font-bold animate-text-glow">
                 {user.name?.split(" ")[0] || user.email}!
               </h1>
-              <p className="mt-2 text-white/80">
-                Peran Anda: <span className="font-bold">{user.role}</span>.
-                Semoga harimu menyenangkan!
+              <p className="mt-2 text-white/80 animate-fade-in">
+                Peran Anda: <span className="font-bold">{user.role}</span>. Ayo
+                wujudkan hari yang luar biasa!
               </p>
             </div>
           </div>
@@ -337,43 +415,146 @@ export default function DashboardPage() {
           : renderAdminMentorDashboard()}
       </div>
       <style jsx global>{`
-        @keyframes sunrise {
+        @keyframes bounceIn {
           0% {
-            transform: translate(-50px, 100px) scale(0.8);
             opacity: 0;
+            transform: scale(0.8);
+          }
+          50% {
+            transform: scale(1.1);
           }
           100% {
-            transform: translate(0, 0) scale(1);
             opacity: 1;
+            transform: scale(1);
           }
         }
-        @keyframes day {
+        @keyframes slideIn {
           0% {
-            transform: translate(0, 0);
+            opacity: 0;
+            transform: translateX(-30px);
           }
           100% {
-            transform: translate(0, -10px);
-          }
-        }
-        @keyframes sunset {
-          0% {
-            transform: translate(0, 0) scale(1);
             opacity: 1;
-          }
-          100% {
-            transform: translate(50px, 100px) scale(0.8);
-            opacity: 0;
+            transform: translateX(0);
           }
         }
-        @keyframes moon {
+        @keyframes fadeIn {
           0% {
-            transform: translateY(10px);
             opacity: 0;
+            transform: translateY(20px);
           }
           100% {
+            opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes countUp {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes wiggle {
+          0%,
+          100% {
+            transform: rotate(-5deg);
+          }
+          50% {
+            transform: rotate(5deg);
+          }
+        }
+        @keyframes textPop {
+          0% {
+            transform: scale(0.9);
+          }
+          50% {
+            transform: scale(1.2);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        @keyframes textGlow {
+          0%,
+          100% {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+          }
+          50% {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+          }
+        }
+        @keyframes pulseSlow {
+          0%,
+          100% {
+            opacity: 0.6;
+          }
+          50% {
             opacity: 1;
           }
+        }
+        @keyframes spinSlow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes twinkle {
+          0%,
+          100% {
+            opacity: 0.4;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        @keyframes bubble {
+          0% {
+            transform: translateY(100vh) scale(0.5);
+            opacity: 0.2;
+          }
+          100% {
+            transform: translateY(-100vh) scale(1);
+            opacity: 0.8;
+          }
+        }
+
+        .animate-bounce-in {
+          animation: bounceIn 0.8s ease-out forwards;
+        }
+        .animate-slide-in {
+          animation: slideIn 0.8s ease-out forwards;
+        }
+        .animate-fade-in {
+          animation: fadeIn 1s ease-out forwards;
+        }
+        .animate-count-up {
+          animation: countUp 1s ease-out forwards;
+        }
+        .animate-wiggle {
+          animation: wiggle 1.5s ease-in-out infinite;
+        }
+        .animate-text-pop {
+          animation: textPop 0.5s ease-out forwards;
+        }
+        .animate-text-glow {
+          animation: textGlow 2s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulseSlow 3s ease-in-out infinite;
+        }
+        .animate-spin-slow {
+          animation: spinSlow 12s linear infinite;
+        }
+        .animate-twinkle {
+          animation: twinkle 2s ease-in-out infinite;
         }
 
         .animate-sunrise {
@@ -382,7 +563,7 @@ export default function DashboardPage() {
           left: 20px;
         }
         .animate-day {
-          animation: day 8s ease-in-out infinite alternate;
+          animation: day 6s ease-in-out infinite alternate;
           top: 15px;
           left: 45%;
         }
@@ -395,6 +576,27 @@ export default function DashboardPage() {
           animation: moon 2s ease-in-out forwards;
           top: 20px;
           right: 30px;
+        }
+
+        .bubble-1 {
+          left: 10%;
+          animation: bubble 10s linear infinite;
+          animation-delay: 0s;
+        }
+        .bubble-2 {
+          left: 30%;
+          animation: bubble 14s linear infinite;
+          animation-delay: 3s;
+        }
+        .bubble-3 {
+          left: 60%;
+          animation: bubble 12s linear infinite;
+          animation-delay: 6s;
+        }
+        .bubble-4 {
+          left: 80%;
+          animation: bubble 16s linear infinite;
+          animation-delay: 9s;
         }
       `}</style>
     </ProtectedRoute>

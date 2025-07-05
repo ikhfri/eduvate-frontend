@@ -282,7 +282,7 @@ export default function TaskDetailPage() {
                         href={`${
                           process.env.NEXT_PUBLIC_API_URL ||
                           "http://localhost:3001"
-                        }${task.mySubmission.fileUrl}`}
+                        }/${task.mySubmission.fileUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
