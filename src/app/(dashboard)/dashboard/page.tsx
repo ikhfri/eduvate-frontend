@@ -23,10 +23,9 @@ import {
   Moon,
   Award,
   Sparkles,
-  
+  Cloud,
 } from "lucide-react";
 
-// Komponen Kartu Statistik Gradien dengan Animasi Dinamis
 const StatCard = ({
   title,
   value,
@@ -71,7 +70,6 @@ const StatCard = ({
   );
 };
 
-// Komponen Kartu Aksi Berwarna dengan Efek Interaktif
 const ActionCard = ({
   title,
   description,
@@ -112,7 +110,6 @@ const ActionCard = ({
   );
 };
 
-// Komponen Motivational Quote dengan Efek Konfeti
 const MotivationalQuote = () => {
   const quotes = [
     "Belajar adalah petualangan seru setiap hari!",
@@ -132,22 +129,26 @@ const MotivationalQuote = () => {
 
   return (
     <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in relative overflow-hidden">
-    
       <Sparkles className="h-6 w-6 animate-bounce-slow" />
       <p className="text-sm font-medium animate-text-glow">{quote}</p>
     </div>
   );
 };
 
-// Komponen Progress Tracker untuk Siswa
 const ProgressTracker = ({
   completedTasks,
   totalTasks,
+  completedQuizzes,
+  totalQuizzes,
 }: {
   completedTasks: number;
   totalTasks: number;
+  completedQuizzes: number;
+  totalQuizzes: number;
 }) => {
-  const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  const totalItems = totalTasks + totalQuizzes;
+  const completedItems = completedTasks + completedQuizzes;
+  const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow-lg animate-bounce-in">
       <div className="flex items-center gap-3 mb-4">
@@ -163,8 +164,8 @@ const ProgressTracker = ({
         />
       </div>
       <p className="text-sm text-muted-foreground mt-2">
-        {completedTasks} dari {totalTasks} tugas selesai ({Math.round(progress)}
-        %)
+        {completedItems} dari {totalItems} tugas dan kuis selesai (
+        {Math.round(progress)}%)
       </p>
     </div>
   );
@@ -250,10 +251,14 @@ export default function DashboardPage() {
       <ProgressTracker
         completedTasks={stats.completedTasks ?? 0}
         totalTasks={(stats.activeTasks ?? 0) + (stats.completedTasks ?? 0)}
+        completedQuizzes={stats.completedQuizzes ?? 0}
+        totalQuizzes={
+          (stats.availableQuizzes ?? 0) + (stats.completedQuizzes ?? 0)
+        }
       />
       <div className="space-y-4">
         <h3 className="text-2xl font-semibold text-foreground flex items-center gap-2 animate-text-pop">
-          <GraduationCap className="h-6 w-6 text-blue-500 animate-wiggle" />{" "}
+          <GraduationCap className="h-6 w-6 text-blue-500 animate-wiggle" />
           Aktivitas Belajar
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -308,8 +313,8 @@ export default function DashboardPage() {
       <div className="bg-card border border-border rounded-xl overflow-hidden animate-bounce-in">
         <div className="p-4 bg-primary/10 border-b border-border">
           <h3 className="text-xl font-semibold text-foreground flex items-center gap-2 animate-text-pop">
-            <UserCog className="h-6 w-6 text-purple-500 animate-wiggle" /> Panel
-            Pengelolaan
+            <UserCog className="h-6 w-6 text-purple-500 animate-wiggle" />
+            Panel Pengelolaan
           </h3>
         </div>
         <div className="p-6">
@@ -363,7 +368,6 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <div className="space-y-8 relative">
-        {/* Animated Background Bubbles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute w-4 h-4 bg-blue-300 rounded-full animate-bubble bubble-1" />
           <div className="absolute w-6 h-6 bg-pink-300 rounded-full animate-bubble bubble-2" />
@@ -372,16 +376,31 @@ export default function DashboardPage() {
         </div>
         {user && (
           <div
-            className={`relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient} animate-bounce-in`}
+            className={`relative p-8 rounded-2xl shadow-2xl text-white overflow-hidden bg-gradient-to-br ${greetingGradient} animate-bounce-in`}
           >
+            {/* Animated Clouds */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <Cloud
+                className="absolute w-24 h-24 text-white/30 animate-cloud-1"
+                style={{ top: "20%", left: "-10%" }}
+              />
+              <Cloud
+                className="absolute w-16 h-16 text-white/20 animate-cloud-2"
+                style={{ top: "40%", left: "-15%" }}
+              />
+              <Cloud
+                className="absolute w-20 h-20 text-white/25 animate-cloud-3"
+                style={{ top: "60%", left: "-20%" }}
+              />
+            </div>
             <div
-              className={`absolute w-24 h-24 rounded-full ${animationClass} z-0`}
+              className={`absolute w-24 h-24 rounded-full ${animationClass} z-10`}
             >
               {skyObject === "sun" && (
-                <div className="w-full h-full bg-yellow-300 rounded-full shadow-[0_0_40px_15px_rgba(253,224,71,0.6)] animate-pulse-slow" />
+                <div className="w-full h-full bg-yellow-300 rounded-full shadow-[0_0_40px_15px_rgba(253,224,71,0.8)] animate-pulse-slow" />
               )}
               {skyObject === "moon" && (
-                <div className="w-full h-full bg-slate-200 rounded-full shadow-[0_0_30px_10px_rgba(226,232,240,0.5)] animate-pulse-slow" />
+                <div className="w-full h-full bg-slate-200 rounded-full shadow-[0_0_30px_10px_rgba(226,232,240,0.7)] animate-pulse-slow" />
               )}
             </div>
             {skyObject === "moon" && (
@@ -392,24 +411,26 @@ export default function DashboardPage() {
                 <Sparkles className="absolute top-[70%] left-[20%] h-3 w-3 text-white/70 animate-twinkle [animation-delay:0.9s]" />
               </>
             )}
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-2">
-                <GreetingIcon className="h-8 w-8 animate-wiggle" />
-                <p className="text-2xl font-semibold animate-text-pop">
-                  {greeting},
-                </p>
+            <div className="relative z-20">
+              <div className="flex items-center gap-4 mb-4">
+                <GreetingIcon className="h-10 w-10 animate-wiggle-slow" />
+                <div>
+                  <p className="text-3xl font-semibold animate-text-pop tracking-wide">
+                    {greeting},
+                  </p>
+                  <h1 className="text-5xl font-extrabold animate-text-glow leading-tight">
+                    {user.name?.split(" ")[0] || user.email}!
+                  </h1>
+                </div>
               </div>
-              <h1 className="text-4xl font-bold animate-text-glow">
-                {user.name?.split(" ")[0] || user.email}!
-              </h1>
-              <p className="mt-2 text-white/80 animate-fade-in">
-                Peran Anda: <span className="font-bold">{user.role}</span>. Ayo
-                wujudkan hari yang luar biasa!
+              <p className="text-lg text-white/90 animate-fade-in max-w-md">
+                Peran Anda:{" "}
+                <span className="font-bold uppercase">{user.role}</span>. Mari
+                buat hari ini penuh inspirasi dan prestasi!
               </p>
             </div>
           </div>
         )}
-
         {user?.role === "STUDENT"
           ? renderStudentDashboard()
           : renderAdminMentorDashboard()}
@@ -467,6 +488,15 @@ export default function DashboardPage() {
             transform: rotate(5deg);
           }
         }
+        @keyframes wiggleSlow {
+          0%,
+          100% {
+            transform: rotate(-3deg);
+          }
+          50% {
+            transform: rotate(3deg);
+          }
+        }
         @keyframes textPop {
           0% {
             transform: scale(0.9);
@@ -481,10 +511,12 @@ export default function DashboardPage() {
         @keyframes textGlow {
           0%,
           100% {
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5),
+              0 0 15px rgba(255, 255, 255, 0.3);
           }
           50% {
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.9),
+              0 0 30px rgba(255, 255, 255, 0.5);
           }
         }
         @keyframes pulseSlow {
@@ -525,7 +557,74 @@ export default function DashboardPage() {
             opacity: 0.8;
           }
         }
-
+        @keyframes sunrise {
+          0% {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        @keyframes day {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-10px);
+          }
+        }
+        @keyframes sunset {
+          0% {
+            transform: translateY(-50px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        @keyframes moon {
+          0% {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes cloudMove1 {
+          0% {
+            transform: translateX(-10vw);
+            opacity: 0.3;
+          }
+          100% {
+            transform: translateX(110vw);
+            opacity: 0.5;
+          }
+        }
+        @keyframes cloudMove2 {
+          0% {
+            transform: translateX(-15vw);
+            opacity: 0.2;
+          }
+          100% {
+            transform: translateX(115vw);
+            opacity: 0.4;
+          }
+        }
+        @keyframes cloudMove3 {
+          0% {
+            transform: translateX(-20vw);
+            opacity: 0.25;
+          }
+          100% {
+            transform: translateX(120vw);
+            opacity: 0.45;
+          }
+        }
         .animate-bounce-in {
           animation: bounceIn 0.8s ease-out forwards;
         }
@@ -540,6 +639,9 @@ export default function DashboardPage() {
         }
         .animate-wiggle {
           animation: wiggle 1.5s ease-in-out infinite;
+        }
+        .animate-wiggle-slow {
+          animation: wiggleSlow 2s ease-in-out infinite;
         }
         .animate-text-pop {
           animation: textPop 0.5s ease-out forwards;
@@ -556,7 +658,6 @@ export default function DashboardPage() {
         .animate-twinkle {
           animation: twinkle 2s ease-in-out infinite;
         }
-
         .animate-sunrise {
           animation: sunrise 1.5s ease-out forwards;
           top: 20px;
@@ -570,14 +671,12 @@ export default function DashboardPage() {
         .animate-sunset {
           animation: sunset 1.5s ease-in forwards;
           top: 20px;
-          right: 20px;
         }
         .animate-moon {
           animation: moon 2s ease-in-out forwards;
           top: 20px;
           right: 30px;
         }
-
         .bubble-1 {
           left: 10%;
           animation: bubble 10s linear infinite;
@@ -597,6 +696,17 @@ export default function DashboardPage() {
           left: 80%;
           animation: bubble 16s linear infinite;
           animation-delay: 9s;
+        }
+        .animate-cloud-1 {
+          animation: cloudMove1 20s linear infinite;
+        }
+        .animate-cloud-2 {
+          animation: cloudMove2 25s linear infinite;
+          animation-delay: 5s;
+        }
+        .animate-cloud-3 {
+          animation: cloudMove3 30s linear infinite;
+          animation-delay: 10s;
         }
       `}</style>
     </ProtectedRoute>
