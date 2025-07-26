@@ -237,7 +237,7 @@ export default function CreateTaskPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  placeholder="Contoh: Laporan Praktikum Bab 1"
+                  placeholder="Contoh: Tugas Nevacad Week 1"
                   required
                   className="rounded-md"
                 />

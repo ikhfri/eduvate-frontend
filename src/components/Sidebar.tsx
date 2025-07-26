@@ -13,6 +13,7 @@ import {
   LogOut,
   LucideIcon,
   Trophy,
+  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -118,6 +119,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   if (user) {
     if (user.role === "STUDENT") {
       navGroups[0].links.push(
+            { href: "/dashboard/materi", label: "Materi Belajar", icon: Book },
         { href: "/dashboard/tugas", label: "Tugas Saya", icon: BookOpen },
         {
           href: "/dashboard/kuis",
@@ -140,6 +142,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       navGroups.push({
         title: "Pengelolaan",
         links: [
+          { href: "/dashboard/manage-materi", label: "Kelola Materi", icon: Book },
+
           {
             href: "/dashboard/manage-tugas",
             label: "Kelola Tugas",
@@ -278,7 +282,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
           <div className="text-center mt-3 pt-3 border-t border-border/50 dark:border-slate-800/50">
             <p className="text-xs text-muted-foreground/80">
-              LMS v1.0.7 - © {new Date().getFullYear()} NEVTIK
+              LMS v1.1.0 - © {new Date().getFullYear()} NEVTIK
             </p>
           </div>
         </div>

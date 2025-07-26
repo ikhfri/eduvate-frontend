@@ -314,7 +314,7 @@ export default function DashboardPage() {
         <div className="p-4 bg-primary/10 border-b border-border">
           <h3 className="text-xl font-semibold text-foreground flex items-center gap-2 animate-text-pop">
             <UserCog className="h-6 w-6 text-purple-500 animate-wiggle" />
-            Panel Pengelolaan
+            Admin Panel
           </h3>
         </div>
         <div className="p-6">

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // app/(dashboard)/dashboard/manage-kuis/[quizId]/results/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -32,12 +31,13 @@ import {
   Users,
   Star,
   Trophy,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format, parseISO, isValid } from "date-fns";
-import { id as LocaleID } from "date-fns/locale";
+import { cn } from "@/lib/utils"; // Assuming utility is moved
+import { saveAs } from "file-saver";
 
-// Interface untuk data hasil percobaan (attempt)
+// Interfaces (restored for type safety)
 interface QuizAttempt {
   id: string;
   score: number;
@@ -49,28 +49,14 @@ interface QuizAttempt {
   };
 }
 
-// Interface untuk data lengkap yang diterima dari API
 interface QuizResultsData {
   quizTitle: string;
   attempts: QuizAttempt[];
   stats?: {
-    // Dibuat opsional untuk mencegah error jika backend tidak mengirimkannya
     participantCount: number;
     averageScore: number;
   };
 }
-
-// Fungsi utilitas untuk memformat tanggal
-const formatDateSafe = (dateString: string | null | undefined): string => {
-  if (!dateString) return "N/A";
-  try {
-    const date = parseISO(dateString);
-    if (!isValid(date)) return "Tanggal tidak valid";
-    return format(date, "dd MMM yyyy, HH:mm", { locale: LocaleID });
-  } catch (error) {
-    return "Error format";
-  }
-};
 
 export default function QuizResultsPage() {
   const router = useRouter();
@@ -81,6 +67,7 @@ export default function QuizResultsPage() {
 
   const [resultsData, setResultsData] = useState<QuizResultsData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchQuizResults = useCallback(async () => {
@@ -88,12 +75,9 @@ export default function QuizResultsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Mengacu pada GET /api/quizzes/:quizId/results
       const response = await axiosInstance.get(`/quizzes/${quizId}/results`);
-      console.log("Data hasil kuis dari backend:", response.data);
       setResultsData(response.data?.data || response.data);
     } catch (err: any) {
-      console.error("Gagal mengambil hasil kuis:", err);
       const errorMessage =
         err.response?.data?.message ||
         "Terjadi kesalahan saat mengambil data hasil kuis.";
@@ -111,6 +95,58 @@ export default function QuizResultsPage() {
   useEffect(() => {
     fetchQuizResults();
   }, [fetchQuizResults]);
+
+  const handleExport = async () => {
+    if (!confirm("Apakah Anda ingin mengunduh hasil kuis dalam format Excel?"))
+      return;
+    setIsExporting(true);
+    toast({
+      title: "Mempersiapkan file...",
+      description: "Harap tunggu sebentar.",
+    });
+    try {
+      const response = await axiosInstance.get(`/quizzes/${quizId}/export`, {
+        responseType: "blob",
+      });
+
+      if (
+        response.headers["content-type"] !==
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ) {
+        throw new Error("Format file tidak valid.");
+      }
+
+      const contentDisposition = response.headers["content-disposition"];
+      let filename = `hasil-kuis-${resultsData?.quizTitle || quizId}.xlsx`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch?.length > 1) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      saveAs(new Blob([response.data]), filename);
+      toast({
+        title: "Unduhan Dimulai",
+        description: "File Excel Anda sedang diunduh.",
+      });
+    } catch (err: any) {
+      console.error("Gagal mengekspor hasil:", err);
+      let errorMessage = "Terjadi kesalahan saat mempersiapkan file.";
+      if (err.response?.status === 404) {
+        errorMessage = "Data kuis tidak ditemukan.";
+      } else if (err.code === "ERR_NETWORK") {
+        errorMessage = "Koneksi jaringan gagal.";
+      }
+      toast({
+        title: "Gagal Mengekspor",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="h-5 w-5 text-yellow-500" />;
@@ -154,6 +190,29 @@ export default function QuizResultsPage() {
           <ChevronLeft className="h-4 w-4 mr-2" />
           Kembali ke Kelola Kuis
         </Button>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Hasil Kuis</h1>
+            <p className="text-muted-foreground">
+              Peringkat dan skor untuk kuis: {resultsData.quizTitle}
+            </p>
+          </div>
+          <Button
+            onClick={handleExport}
+            disabled={isExporting || resultsData.attempts.length === 0}
+            variant="default"
+            size="sm"
+            aria-label="Ekspor hasil kuis ke Excel"
+          >
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Ekspor ke Excel
+          </Button>
+        </div>
 
         <Card className="shadow-lg border-border rounded-lg">
           <CardHeader className="text-center">
@@ -214,25 +273,27 @@ export default function QuizResultsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {resultsData.attempts.map((attempt, index) => (
-                      <TableRow key={attempt.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center justify-center">
-                            {getRankIcon(index + 1)}
-                          </div>
-                        </TableCell>
-                        <TableCell>{attempt.student.name || "N/A"}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {attempt.student.email}
-                        </TableCell>
-                        <TableCell className="text-right font-bold text-primary">
-                          {attempt.score.toFixed(2)}
-                        </TableCell>
-                        <TableCell>
-                          {formatDateSafe(attempt.submittedAt)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {resultsData.attempts.map(
+                      (attempt: QuizAttempt, index: number) => (
+                        <TableRow key={attempt.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center justify-center">
+                              {getRankIcon(index + 1)}
+                            </div>
+                          </TableCell>
+                          <TableCell>{attempt.student.name || "N/A"}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {attempt.student.email}
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-primary">
+                            {attempt.score.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            {cn(attempt.submittedAt)}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
                   </TableBody>
                 </Table>
               </div>

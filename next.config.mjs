@@ -1,7 +1,16 @@
 // next.config.mjs
 const nextConfig = {
   images: {
-    domains: ["api.dicebear.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Tanda '**' mengizinkan SEMUA hostname
+      },
+      {
+        protocol: "http",
+        hostname: "**", // Izinkan juga untuk http jika perlu
+      },
+    ],
   },
 };
 
