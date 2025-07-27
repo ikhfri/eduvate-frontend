@@ -419,7 +419,7 @@ export default function DashboardPage() {
                     {greeting},
                   </p>
                   <h1 className="text-5xl  font-extrabold animate-text-glow leading-tight">
-                    {user.name === "Putri Nur'aini"
+                    {user.name === "Putri Nur'Aini"
                       ? "bangladesh"
                       : user.name?.split(" ")[0] || user.email}
                     !
