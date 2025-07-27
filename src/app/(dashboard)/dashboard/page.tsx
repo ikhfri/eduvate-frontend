@@ -418,8 +418,11 @@ export default function DashboardPage() {
                   <p className="text-3xl font-semibold animate-text-pop tracking-wide">
                     {greeting},
                   </p>
-                  <h1 className="text-5xl font-extrabold animate-text-glow leading-tight">
-                    {user.name?.split(" ")[0] || user.email}!
+                  <h1 className="text-5xl  font-extrabold animate-text-glow leading-tight">
+                    {user.name === "Putri Nur'aini"
+                      ? "bangladesh"
+                      : user.name?.split(" ")[0] || user.email}
+                    !
                   </h1>
                 </div>
               </div>

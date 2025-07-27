@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isValid } from "date-fns";
 import { id as SLocale } from "date-fns/locale";
 
-// Interface untuk data kuis
+// Interface for quiz data
 interface Quiz {
   id: string;
   title: string;
@@ -33,7 +33,7 @@ interface Quiz {
   };
 }
 
-// Fungsi utilitas untuk memformat tanggal dengan aman
+// Utility function to safely format dates
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) {
     return "N/A";
@@ -50,6 +50,7 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
+// Action Menu component for each quiz item
 const ActionMenu = ({
   quiz,
   onDelete,
@@ -61,6 +62,7 @@ const ActionMenu = ({
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -173,6 +175,8 @@ export default function ManageQuizzesPage() {
   }, [user, fetchQuizzes]);
 
   const handleDeleteQuiz = async (quizId: string, quizTitle: string) => {
+    // Note: window.confirm is used here as per original code.
+    // For a more custom UI, a modal component would be a better replacement.
     if (
       !window.confirm(
         `Apakah Anda yakin ingin menghapus kuis "${quizTitle}"? Aksi ini tidak dapat diurungkan.`
@@ -209,19 +213,19 @@ export default function ManageQuizzesPage() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "MENTOR"]}>
-      <div className="container mx-auto p-4 md:p-6 space-y-8">
-        <div className="relative p-8 rounded-2xl shadow-lg bg-gradient-to-br from-teal-500 to-green-600 text-white overflow-hidden">
-          <FileQuestion className="absolute -right-8 -bottom-8 h-48 w-48 text-white/10" />
-          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        <div className="relative p-6 md:p-8 rounded-2xl shadow-lg bg-gradient-to-br from-teal-500 to-green-600 text-white overflow-hidden">
+          <FileQuestion className="absolute -right-8 -bottom-8 h-32 w-32 sm:h-48 sm:w-48 text-white/10" />
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-4xl font-bold">Kelola Kuis</h1>
+              <h1 className="text-3xl md:text-4xl font-bold">Kelola Kuis</h1>
               <p className="mt-2 text-white/80 max-w-lg">
                 Buat, edit, atau hapus kuis untuk menguji pemahaman siswa.
               </p>
             </div>
             <button
               onClick={() => router.push("/dashboard/manage-kuis/new")}
-              className="inline-flex items-center gap-2 px-4 py-2 font-semibold bg-white/90 text-teal-700 rounded-lg shadow-sm hover:bg-white transition-colors flex-shrink-0"
+              className="mt-4 md:mt-0 inline-flex items-center gap-2 px-4 py-2 font-semibold bg-white/90 text-teal-700 rounded-lg shadow-sm hover:bg-white transition-colors flex-shrink-0"
             >
               <PlusCircle className="w-5 h-5" />
               Buat Kuis Baru
@@ -270,8 +274,46 @@ export default function ManageQuizzesPage() {
               </p>
             </div>
           ) : quizzes.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full  text-sm">
+            <div className="md:hidden p-4 space-y-4">
+              {/* --- Mobile View: Card List --- */}
+              {quizzes.map((quiz, index) => (
+                <div
+                  key={quiz.id}
+                  className="bg-secondary/30 rounded-lg border p-4 space-y-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-foreground pr-2">
+                      {quiz.title}
+                    </h3>
+                    <ActionMenu quiz={quiz} onDelete={handleDeleteQuiz} />
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">No:</span>
+                      <span>{index + 1}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Dibuka:</span>
+                      <span>{formatDateSafe(quiz.submissionStartDate)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Tenggat:</span>
+                      <span>{formatDateSafe(quiz.deadline)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Pembuat:</span>
+                      <span>{quiz.author?.name || "-"}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {quizzes.length > 0 ? (
+            <div className="hidden md:block overflow-x-auto">
+              {/* --- Desktop View: Table --- */}
+              <table className="w-full text-sm">
                 <thead className="bg-secondary/50">
                   <tr>
                     <th className="p-4 text-left font-semibold text-muted-foreground w-12">

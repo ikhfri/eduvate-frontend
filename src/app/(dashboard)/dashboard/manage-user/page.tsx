@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // app/(dashboard)/dashboard/manage-user/page.tsx
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -58,6 +58,7 @@ import {
   Trash2,
   Edit,
   PlusCircle,
+  Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isValid } from "date-fns";
@@ -92,7 +93,6 @@ export default function ManageUsersPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State untuk modal tambah pengguna
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -102,7 +102,6 @@ export default function ManageUsersPage() {
   });
   const [isAddingUser, setIsAddingUser] = useState(false);
 
-  // State untuk modal edit peran
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
@@ -168,8 +167,8 @@ export default function ManageUsersPage() {
         description: `Pengguna baru "${newUser.name}" berhasil dibuat.`,
       });
       setIsAddModalOpen(false);
-      setNewUser({ name: "", email: "", password: "", role: "STUDENT" }); // Reset form
-      fetchUsers(); // Muat ulang daftar
+      setNewUser({ name: "", email: "", password: "", role: "STUDENT" });
+      fetchUsers();
     } catch (err: any) {
       toast({
         title: "Gagal Menambah Pengguna",
@@ -246,7 +245,7 @@ export default function ManageUsersPage() {
     }
   };
 
-  if (authLoading || (isLoading && users.length === 0)) {
+  if (authLoading || (isLoading && users.length === 0 && !error)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)]">
         <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
@@ -274,26 +273,30 @@ export default function ManageUsersPage() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "MENTOR"]}>
-      <div className="container mx-auto p-4 md:p-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Kelola Pengguna</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mt-1">
               Lihat, buat, edit peran, dan kelola pengguna dalam sistem.
             </p>
           </div>
-          <Button onClick={() => setIsAddModalOpen(true)}>
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full sm:w-auto"
+          >
             <PlusCircle className="mr-2 h-4 w-4" /> Tambah Pengguna Baru
           </Button>
         </div>
 
-        {error && (
-          <div className="p-4 bg-destructive/10 border text-center border-destructive/30 rounded-md text-destructive text-sm">
+        {error && !isLoading && (
+          <div className="p-4 bg-destructive/10 border text-center border-destructive/30 rounded-md text-destructive text-sm flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
-        <Card className="shadow-lg border-border rounded-lg">
+        <Card className="shadow-lg border-border rounded-xl">
           <CardHeader>
             <CardTitle>Daftar Pengguna</CardTitle>
             <CardDescription>
@@ -301,75 +304,171 @@ export default function ManageUsersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">No.</TableHead>
-                    <TableHead>Nama</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Peran</TableHead>
-                    <TableHead>Tanggal Bergabung</TableHead>
-                    <TableHead className="text-right w-[100px]">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((u, index) => (
-                    <TableRow key={u.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell className="font-medium">
-                        {u.name || (
-                          <span className="italic text-muted-foreground">
-                            Tanpa Nama
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={getRoleBadgeVariant(u.role)}>
-                          {u.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatDateSafe(u.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={() => openEditModal(u)}
-                              disabled={u.id === currentUser?.id}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Ubah Peran
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteUser(u.id, u.name)}
-                              className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                              disabled={u.id === currentUser?.id}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+            {/* --- Mobile View: Card List --- */}
+            <div className="md:hidden space-y-4">
+              {isLoading && users.length === 0 && (
+                <div className="text-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              {!isLoading && users.length === 0 && (
+                <div className="text-center py-16 px-6">
+                  <Users className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Belum Ada Pengguna
+                  </h3>
+                  <p className="text-muted-foreground mt-1">
+                    Klik tombol di atas untuk menambahkan pengguna baru.
+                  </p>
+                </div>
+              )}
+              {users.map((u) => (
+                <div
+                  key={u.id}
+                  className="border rounded-lg p-4 space-y-3 bg-secondary/30"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="font-bold text-foreground pr-2">
+                      {u.name || (
+                        <span className="italic text-muted-foreground">
+                          Tanpa Nama
+                        </span>
+                      )}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => openEditModal(u)}
+                          disabled={u.id === currentUser?.id}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Ubah Peran
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteUser(u.id, u.name)}
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                          disabled={u.id === currentUser?.id}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Hapus
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Email:</span>
+                      <span className="text-right truncate">{u.email}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Peran:</span>
+                      <Badge variant={getRoleBadgeVariant(u.role)}>
+                        {u.role}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Bergabung:</span>
+                      <span>{formatDateSafe(u.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* --- Desktop View: Table --- */}
+            <div className="hidden md:block overflow-x-auto">
+              {isLoading && users.length === 0 && (
+                <div className="text-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              {!isLoading && users.length === 0 ? (
+                <div className="text-center py-16 px-6">
+                  <Users className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Belum Ada Pengguna
+                  </h3>
+                  <p className="text-muted-foreground mt-1">
+                    Klik tombol di atas untuk menambahkan pengguna baru.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[50px]">No.</TableHead>
+                      <TableHead>Nama</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Peran</TableHead>
+                      <TableHead>Tanggal Bergabung</TableHead>
+                      <TableHead className="text-right w-[100px]">
+                        Aksi
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((u, index) => (
+                      <TableRow key={u.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="font-medium">
+                          {u.name || (
+                            <span className="italic text-muted-foreground">
+                              Tanpa Nama
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={getRoleBadgeVariant(u.role)}>
+                            {u.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDateSafe(u.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => openEditModal(u)}
+                                disabled={u.id === currentUser?.id}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Ubah Peran
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteUser(u.id, u.name)}
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                disabled={u.id === currentUser?.id}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Dialog untuk Tambah Pengguna */}
+        {/* Dialog for Add User */}
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Tambah Pengguna Baru</DialogTitle>
               <DialogDescription>
@@ -436,9 +535,9 @@ export default function ManageUsersPage() {
                   </Button>
                 </DialogClose>
                 <Button type="submit" disabled={isAddingUser}>
-                  {isAddingUser ? (
+                  {isAddingUser && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
+                  )}
                   Buat Pengguna
                 </Button>
               </DialogFooter>
@@ -446,9 +545,9 @@ export default function ManageUsersPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog untuk Edit Peran */}
+        {/* Dialog for Edit Role */}
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Ubah Peran Pengguna</DialogTitle>
               <DialogDescription>
@@ -480,9 +579,9 @@ export default function ManageUsersPage() {
                 <Button variant="outline">Batal</Button>
               </DialogClose>
               <Button onClick={handleUpdateRole} disabled={isUpdatingRole}>
-                {isUpdatingRole ? (
+                {isUpdatingRole && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
+                )}
                 Simpan Perubahan
               </Button>
             </DialogFooter>
