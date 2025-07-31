@@ -12,6 +12,7 @@ import {
   BarChart3,
   LogOut,
   LucideIcon,
+  ClipboardCheck,
   Trophy,
   Book,
 } from "lucide-react";
@@ -128,6 +129,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           activePaths: ["/dashboard/kuis/[quizId]/result"],
         },
         {
+          href: "/dashboard/absensi",
+          label: "Absensi",
+          icon: ClipboardCheck,
+        },
+        {
           href: "/dashboard/my-stats",
           label: "Statistik Saya",
           icon: BarChart3,
@@ -163,6 +169,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 },
               ]
             : []),
+            {href: "/dashboard/manage-absensi", label: "Kelola Absensi", icon: ClipboardCheck },
           { href: "/dashboard/stats", label: "Statistik", icon: BarChart3 },
           {
             href: "/dashboard/ranking",
