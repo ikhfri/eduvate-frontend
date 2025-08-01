@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-kuis/[quizId]/questions/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -84,6 +83,7 @@ interface Question {
   type: "MULTIPLE_CHOICE" | "ESSAY" | "TRUE_FALSE";
   imageUrl?: string | null;
   options?: BackendOptionObject[] | string;
+  correctAnswerKeywords?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -100,6 +100,7 @@ interface QuestionFormData {
   imageUrl: string;
   options: OptionFormData[];
   correctOptionIndex: number | null;
+  correctAnswerKeywords: string;
 }
 
 const generateClientSideId = () =>
@@ -116,6 +117,7 @@ const initialQuestionFormData: QuestionFormData = {
     { id: generateClientSideId(), text: "" },
   ],
   correctOptionIndex: null,
+  correctAnswerKeywords: "",
 };
 
 const TRUE_FALSE_OPTIONS: OptionFormData[] = [
@@ -236,6 +238,7 @@ export default function ManageQuizQuestionsPage() {
       imageUrl: question.imageUrl || "",
       options: formOptions,
       correctOptionIndex: correctIdx,
+      correctAnswerKeywords: question.correctAnswerKeywords || "",
     });
     setIsFormModalOpen(true);
   };
@@ -277,6 +280,19 @@ export default function ManageQuizQuestionsPage() {
       toast({
         title: "Error Validasi",
         description: "Teks pertanyaan dan tipe wajib diisi.",
+        variant: "destructive",
+      });
+      setIsSubmittingForm(false);
+      return;
+    }
+
+    if (
+      currentQuestion.type === "ESSAY" &&
+      !currentQuestion.correctAnswerKeywords.trim()
+    ) {
+      toast({
+        title: "Error Validasi",
+        description: "Kata kunci jawaban wajib diisi untuk pertanyaan esai.",
         variant: "destructive",
       });
       setIsSubmittingForm(false);
@@ -329,6 +345,8 @@ export default function ManageQuizQuestionsPage() {
       };
       if (currentQuestion.type !== "ESSAY") {
         payload.options = backendOptions;
+      } else {
+        payload.correctAnswerKeywords = currentQuestion.correctAnswerKeywords.trim();
       }
 
       if (formMode === "add") {
@@ -389,6 +407,7 @@ export default function ManageQuizQuestionsPage() {
             }))
           : [],
       correctOptionIndex: null,
+      correctAnswerKeywords: value === "ESSAY" ? prev!.correctAnswerKeywords : "",
     }));
   };
 
@@ -638,14 +657,36 @@ export default function ManageQuizQuestionsPage() {
                       <Image
                         src={currentQuestion.imageUrl}
                         alt="Pratinjau Gambar"
-                        width={500} // Contoh lebar
-                        height={300} // Contoh tinggi
+                        width={500}
+                        height={300}
                         className="rounded-md max-h-40 object-contain border p-1"
                         unoptimized
                       />
                     </div>
                   )}
                 </div>
+                {currentQuestion.type === "ESSAY" && (
+                  <div>
+                    <Label htmlFor="correctAnswerKeywords">
+                      Kata Kunci Jawaban{" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Textarea
+                      id="correctAnswerKeywords"
+                      name="correctAnswerKeywords"
+                      value={currentQuestion.correctAnswerKeywords}
+                      onChange={handleFormInputChange}
+                      placeholder="Masukkan kata kunci, pisahkan dengan koma (contoh: 1945, merdeka)"
+                      required
+                      rows={2}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Jawaban siswa akan dianggap benar jika mengandung salah satu
+                      kata kunci.
+                    </p>
+                  </div>
+                )}
                 {currentQuestion.type === "MULTIPLE_CHOICE" && (
                   <div className="space-y-3 border p-4 rounded-md">
                     <Label className="font-semibold">
