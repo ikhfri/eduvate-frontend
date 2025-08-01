@@ -34,16 +34,19 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import {
   Loader2,
+  AlertCircle,
   UserCheck,
   UserX,
   FileText,
   Download,
   History,
-} from "lucide-react";
-import { format } from "date-fns";
+  QrCode,
+} from "lucide-react"; // Ditambahkan QrCode
+import { format, startOfWeek, addDays, subDays } from "date-fns";
 import { id as LocaleID } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { saveAs } from "file-saver";
 
 // --- INTERFACES ---
 interface StudentAttendance {
@@ -57,7 +60,6 @@ interface StudentAttendance {
 }
 
 // --- KOMPONEN KECIL ---
-// (Tidak ada perubahan di komponen StatCard dan AttendanceStatusBadge, jadi saya singkat)
 const StatCard = ({
   title,
   count,
@@ -114,6 +116,8 @@ export default function ManageAttendancePage() {
     new Date()
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<{
     student: StudentAttendance;
@@ -121,8 +125,6 @@ export default function ManageAttendancePage() {
     type: "mark" | "view";
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // BARU: State untuk loading saat ekspor
-  const [isExporting, setIsExporting] = useState(false);
 
   const fetchDailyRecap = useCallback(
     async (date: Date) => {
@@ -196,56 +198,27 @@ export default function ManageAttendancePage() {
     }
   };
 
-  // BARU: Fungsi untuk menangani ekspor rekap mingguan
   const handleExportWeeklyRecap = async () => {
-    if (!selectedDate) {
-      toast({
-        title: "Peringatan",
-        description: "Silakan pilih tanggal terlebih dahulu.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!selectedDate) return;
     setIsExporting(true);
     try {
       const response = await axiosInstance.get("/attendance/recap/export", {
         params: {
-          weekStartDate: format(selectedDate, "yyyy-MM-dd"),
+          weekStartDate: format(
+            startOfWeek(selectedDate, { weekStartsOn: 1 }),
+            "yyyy-MM-dd"
+          ),
         },
-        // DIUBAH: Respons yang diharapkan adalah blob (file), bukan JSON
         responseType: "blob",
       });
-
-      // Membuat link sementara untuk mengunduh file
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-
-      // Mendapatkan nama file dari header 'Content-Disposition'
-      const contentDisposition = response.headers["content-disposition"];
-      let filename = `rekap-mingguan-${format(
+      const filename = `rekap-mingguan-${format(
         selectedDate,
         "yyyy-MM-dd"
-      )}.xlsx`; // Nama default
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch && filenameMatch.length > 1) {
-          filename = filenameMatch[1];
-        }
-      }
-
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-
-      // Membersihkan link setelah diunduh
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast({ title: "Sukses", description: "File rekap berhasil diunduh." });
+      )}.xlsx`;
+      saveAs(new Blob([response.data]), filename);
     } catch (error) {
       toast({
-        title: "Gagal Mengekspor",
+        title: "Gagal Ekspor",
         description: "Tidak dapat mengunduh file rekap.",
         variant: "destructive",
       });
@@ -257,7 +230,19 @@ export default function ManageAttendancePage() {
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "MENTOR"]}>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Kelola Absensi Siswa</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Kelola Absensi Siswa</h1>
+            <p className="text-muted-foreground">
+              Pilih tanggal untuk melihat dan mengelola kehadiran.
+            </p>
+          </div>
+          {/* Tombol Scan QR ditambahkan di sini */}
+          <Button onClick={() => router.push("/dashboard/qr-scanner")}>
+            <QrCode className="mr-2 h-4 w-4" /> Scan QR Absen
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-1">
             <Card>
@@ -296,30 +281,14 @@ export default function ManageAttendancePage() {
               />
             </div>
             <Card>
-              {/* DIUBAH: Menambahkan tombol ekspor di header card */}
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Daftar Siswa</CardTitle>
-                  <CardDescription>
-                    Status kehadiran untuk tanggal{" "}
-                    {selectedDate
-                      ? format(selectedDate, "dd MMMM yyyy", {
-                          locale: LocaleID,
-                        })
-                      : ""}
-                  </CardDescription>
-                </div>
-                <Button
-                  onClick={handleExportWeeklyRecap}
-                  disabled={isExporting}
-                >
-                  {isExporting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="mr-2 h-4 w-4" />
-                  )}
-                  Ekspor Mingguan
-                </Button>
+              <CardHeader>
+                <CardTitle>Daftar Siswa</CardTitle>
+                <CardDescription>
+                  Status kehadiran untuk tanggal{" "}
+                  {selectedDate
+                    ? format(selectedDate, "dd MMMM yyyy", { locale: LocaleID })
+                    : ""}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
