@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"], // Penting untuk next-themes
+  darkMode: ["class"], 
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",

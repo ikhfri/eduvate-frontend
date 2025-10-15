@@ -4,11 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**", // Tanda '**' mengizinkan SEMUA hostname
+        hostname: "**",
       },
       {
         protocol: "http",
-        hostname: "**", // Izinkan juga untuk http jika perlu
+        hostname: "**",
       },
     ],
   },
