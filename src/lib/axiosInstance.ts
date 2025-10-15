@@ -6,7 +6,6 @@ import axios, {
   AxiosError,
 } from "axios";
 
-// Ganti 'authToken' dengan nama yang lebih spesifik jika memungkinkan
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
@@ -14,7 +13,6 @@ const axiosInstance: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
 });
 
-// 1. Interceptor untuk menambahkan Access Token ke setiap permintaan
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -30,7 +28,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// 2. Interceptor untuk menangani respons, terutama error
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
@@ -70,23 +67,18 @@ axiosInstance.interceptors.response.use(
 
         const { accessToken: newAccessToken } = response.data;
 
-        // Simpan token baru
         localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
 
-        // Perbarui header di instance Axios untuk permintaan selanjutnya
         axiosInstance.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${newAccessToken}`;
 
-        // Perbarui header di permintaan yang gagal tadi
         if (originalRequest.headers) {
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         }
 
-        // Ulangi permintaan yang gagal dengan token baru
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Jika refresh token juga gagal, logout pengguna
         console.error("Gagal me-refresh token, sesi berakhir.", refreshError);
         localStorage.removeItem(ACCESS_TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
@@ -96,7 +88,6 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Untuk error selain 401, langsung tolak
     return Promise.reject(error);
   }
 );

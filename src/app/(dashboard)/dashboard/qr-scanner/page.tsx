@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/scan-absen/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -37,7 +36,6 @@ export default function QRScannerPage() {
         setBgColor("bg-green-600 dark:bg-green-800");
         playBeep("success");
 
-        // Reload page after successful scan
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -46,7 +44,6 @@ export default function QRScannerPage() {
         setBgColor("bg-red-600 dark:bg-red-800");
         playBeep("error");
 
-        // Reload page after error scan
         setTimeout(() => {
           window.location.reload();
         }, 1000);

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/kuis/[quizId]/result/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -24,7 +23,6 @@ import { format, isValid } from "date-fns";
 import { id as LocaleID } from "date-fns/locale";
 import Image from "next/image";
 
-// --- INTERFACE & TIPE DATA ---
 interface OptionType {
   text: string;
   isCorrect: boolean;
@@ -50,7 +48,6 @@ interface QuizAttemptResult {
   answers: AnswerType[];
 }
 
-// --- FUNGSI & KOMPONEN HELPER ---
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "N/A";
   try {

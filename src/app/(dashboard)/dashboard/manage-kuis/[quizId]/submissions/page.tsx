@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-kuis/[quizId]/submissions/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -34,10 +33,8 @@ import {
   FileSearch,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-// FIX: Menambahkan impor untuk format, parseISO, dan isValid
 import { format, parseISO, isValid } from "date-fns";
 import { id as LocaleID } from "date-fns/locale";
-// FIX: Menambahkan impor untuk utilitas 'cn'
 import { cn } from "@/lib/utils";
 
 interface AttemptData {

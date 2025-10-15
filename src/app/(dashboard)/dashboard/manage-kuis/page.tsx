@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/manage-kuis/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -33,7 +32,6 @@ interface Quiz {
   };
 }
 
-// Utility function to safely format dates
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) {
     return "N/A";
@@ -50,7 +48,6 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
-// Action Menu component for each quiz item
 const ActionMenu = ({
   quiz,
   onDelete,
@@ -175,8 +172,7 @@ export default function ManageQuizzesPage() {
   }, [user, fetchQuizzes]);
 
   const handleDeleteQuiz = async (quizId: string, quizTitle: string) => {
-    // Note: window.confirm is used here as per original code.
-    // For a more custom UI, a modal component would be a better replacement.
+
     if (
       !window.confirm(
         `Apakah Anda yakin ingin menghapus kuis "${quizTitle}"? Aksi ini tidak dapat diurungkan.`
@@ -312,7 +308,6 @@ export default function ManageQuizzesPage() {
 
           {quizzes.length > 0 ? (
             <div className="hidden md:block overflow-x-auto">
-              {/* --- Desktop View: Table --- */}
               <table className="w-full text-sm">
                 <thead className="bg-secondary/50">
                   <tr>

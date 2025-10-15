@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// lms-frontend/app/(dashboard)/dashboard/manage-tugas/[taskId]/edit/page.tsx
 "use client";
 
 import React, { useState, useEffect, FormEvent, useCallback } from "react";
@@ -42,12 +41,11 @@ const availableCourses = [
 const NO_COURSE_SELECTED_VALUE = "__NONE__";
 
 interface TaskData {
-  // Digunakan untuk form dan data dari API
   title: string;
   description: string;
   courseId?: string;
-  submissionStartDate: string; // ISO string from API, datetime-local string for input
-  deadline: string; // ISO string from API, datetime-local string for input
+  submissionStartDate: string; 
+  deadline: string; 
 }
 
 export default function EditTaskPage() {
@@ -64,8 +62,8 @@ export default function EditTaskPage() {
     submissionStartDate: "",
     deadline: "",
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Untuk loading submit form
-  const [isFetching, setIsFetching] = useState<boolean>(true); // Untuk loading data awal
+  const [isLoading, setIsLoading] = useState<boolean>(false); 
+  const [isFetching, setIsFetching] = useState<boolean>(true); 
   const [error, setError] = useState<string | null>(null);
 
   const fetchTaskData = useCallback(async () => {
@@ -73,10 +71,9 @@ export default function EditTaskPage() {
     setIsFetching(true);
     setError(null);
     try {
-      const response = await axiosInstance.get(`/tasks/${taskId}`); // Endpoint GET /api/tasks/:taskId
+      const response = await axiosInstance.get(`/tasks/${taskId}`); 
       const task = response.data.task || response.data;
 
-      // Format tanggal dari ISO string (dari backend) ke format datetime-local (untuk input)
       const formattedStartDate =
         task.submissionStartDate && isValid(parseISO(task.submissionStartDate))
           ? formatDateFns(
@@ -215,10 +212,10 @@ export default function EditTaskPage() {
         courseId:
           formData.courseId === NO_COURSE_SELECTED_VALUE
             ? null
-            : formData.courseId, // Kirim null jika tidak ada course
+            : formData.courseId,
       };
 
-      await axiosInstance.put(`/tasks/${taskId}`, payload); // Endpoint PUT /api/tasks/:taskId
+      await axiosInstance.put(`/tasks/${taskId}`, payload); 
 
       toast({
         title: "Tugas Berhasil Diperbarui",
@@ -273,7 +270,6 @@ export default function EditTaskPage() {
   }
 
   if (!formData.title && !isFetching) {
-    // Jika data tidak ada setelah fetch selesai
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] text-center p-4">
         <AlertTriangle className="h-16 w-16 text-muted-foreground mb-4" />
@@ -318,7 +314,7 @@ export default function EditTaskPage() {
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error &&
-                !isLoading && ( // Tampilkan error submit form jika ada dan tidak sedang loading
+                !isLoading && (
                   <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive text-sm flex items-center">
                     <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
                     {error}

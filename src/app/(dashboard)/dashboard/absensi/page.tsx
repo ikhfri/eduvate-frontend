@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/absensi/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -14,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, QrCode, Calendar, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Komponen untuk setiap pilihan aksi (Izin atau QR)
 const ActionCard = ({
   icon: Icon,
   title,
@@ -50,7 +48,6 @@ const ActionCard = ({
   </motion.div>
 );
 
-// Komponen untuk tampilan setelah berhasil mengajukan izin
 const SuccessState = ({ onReset }: { onReset: () => void }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
@@ -75,7 +72,7 @@ export default function StudentAttendancePage() {
   const router = useRouter();
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [leaveSubmitted, setLeaveSubmitted] = useState(false); // State untuk menandai izin sudah diajukan
+  const [leaveSubmitted, setLeaveSubmitted] = useState(false); 
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -101,7 +98,7 @@ export default function StudentAttendancePage() {
         title: "Berhasil",
         description: "Pengajuan izin Anda telah berhasil dicatat.",
       });
-      setLeaveSubmitted(true); // Set state berhasil
+      setLeaveSubmitted(true); 
     } catch (err: any) {
       toast({
         title: "Gagal Mengajukan Izin",
@@ -134,7 +131,6 @@ export default function StudentAttendancePage() {
           <SuccessState onReset={() => setLeaveSubmitted(false)} />
         ) : (
           <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Kartu untuk Ajukan Izin */}
             <ActionCard
               icon={Send}
               title="Ajukan Izin"
@@ -154,7 +150,6 @@ export default function StudentAttendancePage() {
               />
             </ActionCard>
 
-            {/* Kartu untuk Tampilkan QR Code */}
             <ActionCard
               icon={QrCode}
               title="Hadir di Tempat"

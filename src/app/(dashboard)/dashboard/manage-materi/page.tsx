@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/manage-materi/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -8,7 +7,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import axiosInstance from "@/lib/axiosInstance";
 import { useToast } from "@/hooks/use-toast";
 
-// UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,7 +60,6 @@ import {
 import { format, parseISO, isValid } from "date-fns";
 import { id as LocaleID } from "date-fns/locale";
 
-// --- Type Definitions ---
 interface Material {
   id: string;
   title: string;
@@ -75,7 +72,6 @@ interface Material {
 
 type MaterialFormData = Omit<Material, "id" | "createdAt" | "author">;
 
-// --- Helper Functions ---
 const formatDate = (dateString: string) => {
   try {
     const date = parseISO(dateString);
@@ -87,18 +83,15 @@ const formatDate = (dateString: string) => {
   }
 };
 
-// --- Main Page Component ---
 export default function ManageMaterialsPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // State
   const [materials, setMaterials] = useState<Material[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for Modals
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,11 +129,9 @@ export default function ManageMaterialsPage() {
     setIsSubmitting(true);
     try {
       if (editingMaterial) {
-        // Update existing material
         await axiosInstance.put(`/materials/${editingMaterial.id}`, formData);
         toast({ title: "Sukses", description: "Materi berhasil diperbarui." });
       } else {
-        // Add new material
         await axiosInstance.post("/materials", formData);
         toast({
           title: "Sukses",
@@ -148,7 +139,7 @@ export default function ManageMaterialsPage() {
         });
       }
       setIsFormModalOpen(false);
-      fetchMaterials(); // Refresh data
+      fetchMaterials(); 
     } catch (err: any) {
       toast({
         title: "Gagal",
@@ -219,7 +210,6 @@ export default function ManageMaterialsPage() {
 
         {!isLoading && !error && materials.length > 0 && (
           <>
-            {/* Mobile View: Cards */}
             <div className="grid gap-4 md:hidden">
               {materials.map((material) => (
                 <Card key={material.id} className="overflow-hidden">
@@ -277,7 +267,6 @@ export default function ManageMaterialsPage() {
               ))}
             </div>
 
-            {/* Desktop View: Table */}
             <div className="hidden md:block rounded-lg border">
               <Table>
                 <TableHeader>
@@ -337,7 +326,6 @@ export default function ManageMaterialsPage() {
         )}
       </div>
 
-      {/* Add/Edit Material Dialog */}
       <MaterialFormDialog
         isOpen={isFormModalOpen}
         onOpenChange={setIsFormModalOpen}
@@ -346,7 +334,6 @@ export default function ManageMaterialsPage() {
         initialData={editingMaterial}
       />
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!materialToDelete}
         onOpenChange={() => setMaterialToDelete(null)}
@@ -378,7 +365,6 @@ export default function ManageMaterialsPage() {
   );
 }
 
-// --- Reusable Form Dialog Component ---
 interface MaterialFormDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;

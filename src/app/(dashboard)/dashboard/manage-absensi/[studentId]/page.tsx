@@ -36,7 +36,6 @@ interface AttendanceRecord {
   notes: string | null;
 }
 
-// --- KOMPONEN KECIL (Bisa diimpor dari file lain jika sudah ada) ---
 const AttendanceStatusBadge = ({
   status,
 }: {
@@ -61,7 +60,6 @@ const AttendanceStatusBadge = ({
   );
 };
 
-// --- KOMPONEN UTAMA ---
 export default function StudentHistoryPage() {
   const { user } = useAuth();
   const { toast } = useToast();

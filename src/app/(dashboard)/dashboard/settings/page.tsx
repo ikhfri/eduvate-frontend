@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/settings/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -17,7 +16,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Komponen Input Kustom dengan Ikon
 const FormInput = ({
   id,
   label,
@@ -40,7 +38,6 @@ const FormInput = ({
   </div>
 );
 
-// Komponen untuk Form Profil
 const ProfileForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -60,13 +57,12 @@ const ProfileForm = () => {
     try {
       await axiosInstance.put("/users/profile", { name: formData.name });
 
-      // --- PERUBAHAN DI SINI ---
-      // Memberi notifikasi bahwa perlu login ulang untuk melihat perubahan
+     
       toast({
         title: "Profil Berhasil Disimpan",
         description:
           "Perubahan nama Anda akan terlihat di seluruh aplikasi setelah Anda login kembali.",
-        duration: 5000, // Tampilkan pesan sedikit lebih lama
+        duration: 5000, 
       });
     } catch (err: any) {
       toast({
@@ -242,7 +238,6 @@ export default function SettingsPage() {
   return (
     <ProtectedRoute>
       <div className="space-y-8">
-        {/* HERO BANNER */}
         <div className="relative p-8 rounded-2xl shadow-xl text-white overflow-hidden bg-gradient-to-br from-purple-600 to-indigo-700">
           <SettingsIcon className="absolute -right-10 -bottom-10 h-48 w-48 text-white/10" />
           <div className="relative z-10">
@@ -254,9 +249,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* KONTENER UTAMA DENGAN TAB */}
         <div className="bg-card border border-border rounded-xl shadow-lg">
-          {/* Navigasi Tab (Pill-based) */}
           <div className="p-2 bg-secondary/30 rounded-t-xl">
             <div className="flex w-full md:w-auto bg-secondary p-1 rounded-lg space-x-1">
               <button

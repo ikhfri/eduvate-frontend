@@ -31,9 +31,7 @@ interface Task {
   author: {
     name: string;
   };
-  // Tambahkan properti lain jika ada, misal status submission
   mySubmission?: {
-    // Opsional, jika data submission siswa disertakan
     id: string;
     submittedAt: string;
     grade?: number;
@@ -163,7 +161,6 @@ export function TaskCard({ task, userRole }: TaskCardProps) {
             className="w-full"
           >
             {" "}
-            {/* Arahkan ke halaman detail admin */}
             <Button variant="outline" className="w-full">
               <Edit3 className="mr-2 h-4 w-4" />
               Kelola Tugas

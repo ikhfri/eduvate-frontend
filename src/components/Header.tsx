@@ -1,4 +1,3 @@
-// components/Header.tsx (atau di mana pun file Anda berada)
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -23,7 +22,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Hook untuk menutup dropdown saat klik di luar area menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -45,7 +43,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     setIsMenuOpen(false);
   };
 
-  // Jangan tampilkan header di halaman login/register
   const pathname = usePathname();
   if (pathname === "/login" || pathname === "/register") {
     return null;
@@ -55,7 +52,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     <header className="fixed top-0 right-0 left-0 md:left-72 z-30 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Tombol Hamburger di mobile (kini di dalam header) */}
           <button
             onClick={onToggleSidebar}
             className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-full"
@@ -64,22 +60,17 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
             <span className="sr-only">Buka menu</span>
           </button>
 
-          {/* Spacer untuk mendorong item ke kanan */}
           <div className="flex-grow hidden md:block" />
 
-          {/* Item di sebelah kanan */}
           <div className="flex items-center space-x-2 md:space-x-4">
             <ThemeToggle />
 
             {user && (
-              // --- DROPDOWN MENU KUSTOM ---
               <div className="relative" ref={dropdownRef}>
-                {/* Tombol Pemicu dengan Avatar */}
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="relative h-9 w-9 rounded-full flex items-center justify-center bg-primary text-primary-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 >
-                  {/* Tampilkan inisial nama jika ada, jika tidak, ikon User */}
                   {user.name ? (
                     user.name.charAt(0).toUpperCase()
                   ) : (
@@ -88,7 +79,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                   <span className="sr-only">Buka menu pengguna</span>
                 </button>
 
-                {/* Konten Dropdown */}
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-lg shadow-xl overflow-hidden transition-all duration-200 ease-in-out origin-top-right animate-in fade-in-0 zoom-in-95">
                     <div className="p-3 border-b border-border">

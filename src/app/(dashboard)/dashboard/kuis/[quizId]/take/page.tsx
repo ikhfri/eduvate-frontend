@@ -44,7 +44,6 @@ import Image from "next/image";
 import { useTabMonitor } from "@/hooks/useTabMonitor";
 import { cn } from "@/lib/utils";
 
-// Interface untuk attempt
 interface QuizAttempt {
   id: string;
   status: "IN_PROGRESS" | "COMPLETED";
@@ -61,7 +60,6 @@ interface QuizAttempt {
   violationCount: number;
 }
 
-// Interface untuk soal
 interface QuestionToTake {
   id: string;
   text: string;
@@ -70,7 +68,6 @@ interface QuestionToTake {
   imageUrl?: string | null;
 }
 
-// Interface untuk kuis
 interface QuizToTake {
   id: string;
   title: string;
@@ -80,7 +77,6 @@ interface QuizToTake {
   attempt: QuizAttempt;
 }
 
-// Interface untuk jawaban siswa
 interface StudentAnswer {
   questionId: string;
   selectedOptionIndex?: number;
@@ -89,7 +85,6 @@ interface StudentAnswer {
 
 const VISIBILITY_CHANGE_LIMIT = 7;
 
-// Komponen QuestionMap
 const QuestionMap = ({
   totalQuestions,
   currentQuestionIndex,
@@ -143,7 +138,6 @@ const QuestionMap = ({
   </Card>
 );
 
-// Komponen QuizInfoPanel
 const QuizInfoPanel = ({
   timeLeft,
   formatTime,
@@ -232,7 +226,6 @@ export default function TakeQuizPage() {
     return quizData.questions[currentQuestionIndex];
   }, [quizData, currentQuestionIndex]);
 
-  // Fungsi untuk menyimpan progres
   const saveProgress = useCallback(async () => {
     if (!attempt || isSubmitting || !quizData) return;
     try {
@@ -266,7 +259,6 @@ export default function TakeQuizPage() {
     }
   }, [attempt, answers, timeLeft, violationCount, quizData, toast, isSubmitting]);
 
-  // Simpan progres setiap 10 detik atau saat jawaban berubah
   useEffect(() => {
     if (!attempt || isSubmitting) return;
     const interval = setInterval(() => {
@@ -405,7 +397,6 @@ export default function TakeQuizPage() {
       }
       setQuizData({ ...data, questions: data.questions || [] });
       setAttempt(data.attempt);
-      // Muat jawaban dari progress
       if (data.attempt?.progress?.answers) {
         const loadedAnswers = new Map<string, StudentAnswer>();
         Object.entries(data.attempt.progress.answers).forEach(
@@ -448,7 +439,6 @@ export default function TakeQuizPage() {
     }
   }, [fetchQuiz, authLoading]);
 
-  // Timer
   useEffect(() => {
     if (timeLeft === 0) {
       handleSubmitQuiz(true, "Waktu habis, jawaban Anda dikirim otomatis.");

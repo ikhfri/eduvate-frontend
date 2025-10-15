@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-kuis/[quizId]/results/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -9,8 +8,6 @@ import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
-
-// UI Components
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,7 +30,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// Icons & Utilities
 import {
   Loader2,
   AlertCircle,
@@ -51,7 +47,6 @@ import { id as LocaleID } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import { saveAs } from "file-saver";
 
-// --- Type Definitions ---
 interface QuizAttempt {
   id: string;
   score: number;
@@ -72,7 +67,6 @@ interface QuizResultsData {
   };
 }
 
-// --- Helper & Child Components ---
 
 const formatDate = (dateString: string) => {
   try {
@@ -315,7 +309,6 @@ export default function QuizResultsPage() {
           </Button>
         </motion.div>
 
-        {/* KARTU STATISTIK YANG DIPERBARUI */}
         <motion.div
           className="p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg"
           variants={{

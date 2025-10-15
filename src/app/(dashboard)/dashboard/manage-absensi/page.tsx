@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-absensi/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -9,8 +8,6 @@ import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
-
-// UI Components
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,10 +39,9 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input"; // NEW: Added Input component
-import { Search } from "lucide-react"; // NEW: Added Search icon
+import { Input } from "@/components/ui/input"; 
+import { Search } from "lucide-react"; 
 
-// Icons & Utilities
 import {
   Loader2,
   UserCheck,
@@ -62,7 +58,6 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { saveAs } from "file-saver";
 
-// --- INTERFACES & HELPERS ---
 interface StudentAttendance {
   id: string;
   name: string | null;
@@ -81,7 +76,6 @@ const getInitials = (name: string | null) =>
     .join("")
     .toUpperCase() || "S";
 
-// --- CHILD COMPONENTS ---
 const StatCard = ({
   title,
   count,
@@ -153,7 +147,6 @@ const TableSkeleton = () =>
     </TableRow>
   ));
 
-// --- MAIN COMPONENT ---
 export default function ManageAttendancePage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -172,7 +165,7 @@ export default function ManageAttendancePage() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // NEW: State for search query
+  const [searchQuery, setSearchQuery] = useState(""); 
 
   const fetchDailyRecap = useCallback(
     async (date: Date) => {
@@ -212,7 +205,6 @@ export default function ManageAttendancePage() {
     );
   }, [dailyData]);
 
-  // NEW: Filter data based on search query
   const filteredData = useMemo(() => {
     if (!searchQuery) return dailyData;
     return dailyData.filter((student) =>
@@ -289,7 +281,6 @@ export default function ManageAttendancePage() {
         animate={{ opacity: 1 }}
         className="space-y-6"
       >
-        {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
@@ -346,7 +337,6 @@ export default function ManageAttendancePage() {
           </div>
         </div>
 
-        {/* STATS CARDS (RESPONSIVE) */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <StatCard
@@ -374,7 +364,6 @@ export default function ManageAttendancePage() {
           </div>
         </div>
 
-        {/* SEARCH INPUT */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -386,7 +375,6 @@ export default function ManageAttendancePage() {
           />
         </div>
 
-        {/* STUDENT LIST TABLE */}
         <Card>
           <CardHeader>
             <CardTitle>Daftar Siswa</CardTitle>
@@ -412,7 +400,7 @@ export default function ManageAttendancePage() {
                     <AnimatePresence>
                       {filteredData.map(
                         (
-                          student // CHANGED: dailyData to filteredData
+                          student
                         ) => (
                           <motion.tr
                             key={student.id}
@@ -475,7 +463,7 @@ export default function ManageAttendancePage() {
               </Table>
             </div>
             {!isLoading &&
-              filteredData.length === 0 && ( // CHANGED: dailyData to filteredData
+              filteredData.length === 0 && ( 
                 <div className="text-center py-10 text-muted-foreground">
                   {searchQuery
                     ? "Tidak ada siswa yang cocok dengan pencarian."
@@ -486,7 +474,6 @@ export default function ManageAttendancePage() {
         </Card>
       </motion.div>
 
-      {/* MODAL/DIALOG */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>

@@ -5,7 +5,6 @@ import React, { useEffect, useState, useCallback, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format, parseISO, isValid as isValidDate } from "date-fns";
 import { id as LocaleID } from "date-fns/locale";
-// import axiosInstance from '@/lib/axiosInstance'; // Diganti dengan fetch
 import { useAuth} from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
@@ -46,9 +45,9 @@ import {
   Award,
   Send,
   Info,
-} from "lucide-react"; // Import Info
+} from "lucide-react"; 
 import { useToast } from "@/hooks/use-toast";
-import { fetchApi } from "@/lib/fetchApi"; // Impor helper fetchApi
+import { fetchApi } from "@/lib/fetchApi"; 
 
 interface SubmissionStudent {
   id: string;
@@ -61,7 +60,7 @@ interface Submission {
   submittedAt: string;
   fileUrl: string;
   grade?: number | null;
-  feedback?: string | null; // Diubah dari comment ke feedback agar konsisten dengan frontend lain
+  feedback?: string | null; 
   student: SubmissionStudent;
 }
 
@@ -107,7 +106,7 @@ export default function ManageSubmissionsPage() {
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
   const [grade, setGrade] = useState<string>("");
-  const [feedbackText, setFeedbackText] = useState<string>(""); // Menggunakan feedbackText untuk state
+  const [feedbackText, setFeedbackText] = useState<string>(""); 
   const [isGradingLoading, setIsGradingLoading] = useState<boolean>(false);
   const [isGradingDialogOpen, setIsGradingDialogOpen] =
     useState<boolean>(false);
@@ -185,7 +184,7 @@ export default function ManageSubmissionsPage() {
   const handleGradeClick = (submission: Submission) => {
     setSelectedSubmission(submission);
     setGrade(submission.grade?.toString() || "");
-    setFeedbackText(submission.feedback || ""); // Menggunakan feedbackText
+    setFeedbackText(submission.feedback || ""); 
     setIsGradingDialogOpen(true);
   };
 
@@ -205,13 +204,12 @@ export default function ManageSubmissionsPage() {
 
     setIsGradingLoading(true);
     try {
-      // Menggunakan PUT dan mengirim 'comment' sesuai backend controller
       await fetchApi(`/tasks/submissions/${selectedSubmission.id}/grade`, {
-        method: "PUT", // Sesuai dengan backend route: .put(authorizeRole(["ADMIN", "MENTOR"]), taskController.gradeSubmission)
+        method: "PUT", 
         token,
         body: {
           grade: numericGrade,
-          comment: feedbackText, // Mengirim feedbackText sebagai 'comment'
+          comment: feedbackText, 
         },
       });
       toast({
@@ -439,13 +437,12 @@ export default function ManageSubmissionsPage() {
                 <div>
                   <Label htmlFor="feedbackText" className="text-right">
                     {" "}
-                    {/* Diubah ke feedbackText */}
                     Feedback/Catatan
                   </Label>
                   <Textarea
-                    id="feedbackText" // Diubah ke feedbackText
-                    value={feedbackText} // Menggunakan state feedbackText
-                    onChange={(e) => setFeedbackText(e.target.value)} // Update state feedbackText
+                    id="feedbackText" 
+                    value={feedbackText} 
+                    onChange={(e) => setFeedbackText(e.target.value)} 
                     rows={4}
                     placeholder="Berikan feedback konstruktif untuk siswa..."
                     className="col-span-3"

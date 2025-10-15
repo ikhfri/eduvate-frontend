@@ -34,16 +34,14 @@ import {
   CalendarPlus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { formatISO, parse, isValid } from "date-fns"; // Import isValid
+import { formatISO, parse, isValid } from "date-fns"; 
 
-// Misalkan ada daftar mata kuliah (bisa diambil dari API atau statis)
 const availableCourses = [
   { id: "course2", name: "Linux" },
   { id: "course3", name: "Jaringan Komputer" },
   { id: "course4", name: "Mikrotik" },
 ];
 
-// Definisikan nilai khusus untuk "Tidak ada/Umum"
 const NO_COURSE_SELECTED_VALUE = "__NONE__";
 
 interface CreateTaskFormData {
@@ -62,7 +60,7 @@ export default function CreateTaskPage() {
   const [formData, setFormData] = useState<CreateTaskFormData>({
     title: "",
     description: "",
-    courseId: NO_COURSE_SELECTED_VALUE, // Default ke nilai khusus
+    courseId: NO_COURSE_SELECTED_VALUE, 
     submissionStartDate: "",
     deadline: "",
   });
@@ -149,8 +147,7 @@ export default function CreateTaskPage() {
         courseId:
           formData.courseId === NO_COURSE_SELECTED_VALUE
             ? undefined
-            : formData.courseId, // Kirim undefined jika tidak ada course
-        // authorId: user?.id // Jika backend memerlukan ID pembuat tugas
+            : formData.courseId,
       };
 
       await axiosInstance.post("/tasks", payload);
@@ -159,17 +156,14 @@ export default function CreateTaskPage() {
         title: "Tugas Berhasil Dibuat",
         description: `Tugas "${formData.title}" telah ditambahkan.`,
         variant: "default",
-      });
-      // Reset form setelah berhasil
-      setFormData({
+      });      setFormData({
         title: "",
         description: "",
         courseId: NO_COURSE_SELECTED_VALUE,
         submissionStartDate: "",
         deadline: "",
       });
-      // Arahkan ke halaman daftar tugas admin (opsional, bisa juga tetap di halaman ini)
-      // router.push('/dashboard/manage-tugas');
+ 
     } catch (err: any) {
       console.error("Gagal membuat tugas:", err);
       const errorMessage =

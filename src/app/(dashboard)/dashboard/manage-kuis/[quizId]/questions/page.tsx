@@ -64,19 +64,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
-// Interface untuk data Kuis (detail)
 interface QuizDetails {
   id: string;
   title: string;
 }
 
-// Structure for individual option object as expected by backend
 interface BackendOptionObject {
   text: string;
   isCorrect: boolean;
 }
 
-// Interface untuk data Pertanyaan dari backend
 interface Question {
   id: string;
   text: string;
@@ -88,7 +85,6 @@ interface Question {
   updatedAt: string;
 }
 
-// Interface untuk form state pertanyaan (frontend-centric)
 interface OptionFormData {
   id: string;
   text: string;

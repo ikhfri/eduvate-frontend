@@ -120,7 +120,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   if (user) {
     if (user.role === "STUDENT") {
       navGroups[0].links.push(
-            { href: "/dashboard/materi", label: "Materi Belajar", icon: Book },
+        { href: "/dashboard/materi", label: "Materi Belajar", icon: Book },
         { href: "/dashboard/tugas", label: "Tugas Saya", icon: BookOpen },
         {
           href: "/dashboard/kuis",
@@ -148,7 +148,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       navGroups.push({
         title: "Pengelolaan",
         links: [
-          { href: "/dashboard/manage-materi", label: "Kelola Materi", icon: Book },
+          {
+            href: "/dashboard/manage-materi",
+            label: "Kelola Materi",
+            icon: Book,
+          },
 
           {
             href: "/dashboard/manage-tugas",
@@ -169,7 +173,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 },
               ]
             : []),
-            {href: "/dashboard/manage-absensi", label: "Kelola Absensi", icon: ClipboardCheck },
+          {
+            href: "/dashboard/manage-absensi",
+            label: "Kelola Absensi",
+            icon: ClipboardCheck,
+          },
           { href: "/dashboard/stats", label: "Statistik", icon: BarChart3 },
           {
             href: "/dashboard/ranking",
@@ -222,15 +230,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       >
         <div className="flex flex-col items-center justify-center pt-6 pb-4 px-4 flex-shrink-0">
           <Link href="/dashboard" className="flex flex-row items-center gap-2">
-            <Image height={65} width={65} src="/icon.png" alt="logo" />
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-foreground whitespace-nowrap">
-                NEVTIK
-              </span>
-              <span className="text-sm font-bold text-foreground whitespace-nowrap">
-                Learning Platform
-              </span>
-            </div>
+            <Image height={90} width={90} src="/icon.png" alt="logo" />
+          
           </Link>
         </div>
 
@@ -289,7 +290,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
           <div className="text-center mt-3 pt-3 border-t border-border/50 dark:border-slate-800/50">
             <p className="text-xs text-muted-foreground/80">
-              LMS v1.1.0 - © {new Date().getFullYear()} NEVTIK
+              LMS v1.0.0 - © {new Date().getFullYear()} Eduvate
             </p>
           </div>
         </div>

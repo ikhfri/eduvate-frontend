@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { format, parseISO, isPast, isValid as isValidDate } from "date-fns"; // Import isValidDate
+import { format, parseISO, isPast, isValid as isValidDate } from "date-fns"; 
 import { id as LocaleID } from "date-fns/locale";
 import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/context/AuthContext";
@@ -56,7 +56,6 @@ interface TaskDetail {
   } | null;
 }
 
-// Helper function untuk format tanggal yang aman
 const formatDateSafe = (
   dateString: string | undefined | null,
   formatPattern: string
@@ -65,7 +64,6 @@ const formatDateSafe = (
   try {
     const date = parseISO(dateString);
     if (!isValidDate(date)) {
-      // Menggunakan isValidDate dari date-fns
       console.warn(
         `Invalid date string received for formatting: ${dateString}`
       );

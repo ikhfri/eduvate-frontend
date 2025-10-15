@@ -32,7 +32,7 @@ interface AuthContextType {
   setUser: Dispatch<SetStateAction<User | null>>;
   setToken: Dispatch<SetStateAction<string | null>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  refetchUser: () => Promise<void>; // <-- DITAMBAHKAN: Sesuai instruksi
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -130,7 +130,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push("/login");
   }, [router]);
 
-  // DITAMBAHKAN: Implementasi fungsi refetchUser
   const refetchUser = useCallback(async () => {
     const currentToken = localStorage.getItem("authToken");
     if (!currentToken) {
@@ -138,21 +137,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return;
     }
     try {
-      // Menggunakan endpoint /auth/me untuk mendapatkan data pengguna terbaru
       const response = await axiosInstance.get("/auth/me");
       const userData = response.data.user || response.data;
 
       setUser(userData);
-      localStorage.setItem("authUser", JSON.stringify(userData)); // Perbarui juga data di storage
+      localStorage.setItem("authUser", JSON.stringify(userData)); 
     } catch (error) {
       console.error(
         "Gagal mengambil ulang data pengguna (token mungkin tidak valid):",
         error
       );
-      // Jika token tidak valid, logout pengguna
       logout();
     }
-  }, [logout]); // Bergantung pada fungsi logout
+  }, [logout]); 
 
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
@@ -182,7 +179,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser,
         setToken,
         setLoading,
-        refetchUser, // <-- DITAMBAHKAN: Fungsi disediakan melalui context
+        refetchUser,
       }}
     >
       {children}

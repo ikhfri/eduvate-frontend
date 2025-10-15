@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// lms-frontend/components/TaskForm.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,9 +25,8 @@ import { format } from "date-fns";
 import { id as localeID } from 'date-fns/locale';
 import axiosInstance from "@/lib/axiosInstance";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast"; // Akan dibuat
+import { useToast } from "@/hooks/use-toast"; 
 
-// Skema validasi form menggunakan Zod
 const taskFormSchema = z.object({
   title: z.string().min(3, { message: "Judul minimal 3 karakter." }).max(100, { message: "Judul maksimal 100 karakter."}),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
@@ -36,7 +34,7 @@ const taskFormSchema = z.object({
   deadline: z.date({ required_error: "Tanggal deadline wajib diisi." }),
 }).refine(data => data.submissionStartDate < data.deadline, {
   message: "Tanggal mulai harus sebelum tanggal deadline.",
-  path: ["submissionStartDate"], // Tunjukkan error pada field submissionStartDate
+  path: ["submissionStartDate"], 
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -45,12 +43,12 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  submissionStartDate: string; // ISO string
-  deadline: string; // ISO string
+  submissionStartDate: string;
+  deadline: string;
 }
 interface TaskFormProps {
   onSuccess: () => void;
-  existingTask?: Task | null; // Tugas yang ada jika mode edit
+  existingTask?: Task | null; 
 }
 
 export default function TaskForm({ onSuccess, existingTask }: TaskFormProps) {
@@ -67,12 +65,12 @@ export default function TaskForm({ onSuccess, existingTask }: TaskFormProps) {
     } : {
       title: "",
       description: "",
-      submissionStartDate: undefined, // Biarkan kosong atau set default
-      deadline: undefined, // Biarkan kosong atau set default
+      submissionStartDate: undefined, 
+      deadline: undefined, 
     },
   });
 
-  useEffect(() => { // Untuk mereset form jika existingTask berubah (misal saat dialog dibuka ulang untuk task berbeda)
+  useEffect(() => { 
     if (existingTask) {
       form.reset({
         title: existingTask.title,
@@ -101,22 +99,20 @@ export default function TaskForm({ onSuccess, existingTask }: TaskFormProps) {
       };
 
       if (existingTask) {
-        // Mode Edit
         await axiosInstance.put(`/tasks/${existingTask.id}`, payload);
         toast({
           title: "Sukses!",
           description: "Tugas berhasil diperbarui.",
         });
       } else {
-        // Mode Create
         await axiosInstance.post("/tasks", payload);
         toast({
           title: "Sukses!",
           description: "Tugas baru berhasil dibuat.",
         });
       }
-      onSuccess(); // Panggil callback sukses (misal: tutup modal, refresh list)
-      form.reset(); // Reset form setelah sukses
+      onSuccess(); 
+      form.reset();
     } catch (error: any) {
       console.error("Gagal menyimpan tugas:", error);
       toast({
@@ -193,10 +189,9 @@ export default function TaskForm({ onSuccess, existingTask }: TaskFormProps) {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) } // Nonaktifkan tanggal sebelum hari ini
+                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) } 
                         initialFocus
                     />
-                    {/* Tambahkan input waktu di sini jika perlu */}
                     </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -236,7 +231,6 @@ export default function TaskForm({ onSuccess, existingTask }: TaskFormProps) {
                         disabled={(date) => date < (form.getValues("submissionStartDate") || new Date(new Date().setHours(0,0,0,0)))}
                         initialFocus
                     />
-                     {/* Tambahkan input waktu di sini jika perlu */}
                     </PopoverContent>
                 </Popover>
                 <FormMessage />

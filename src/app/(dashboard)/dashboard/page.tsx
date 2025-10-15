@@ -25,7 +25,6 @@ import {
   Cloud,
 } from "lucide-react";
 
-// Define interfaces for type safety
 interface Stats {
   activeTasks?: number;
   completedTasks?: number;
@@ -60,7 +59,6 @@ interface ProgressTrackerProps {
   totalQuizzes: number;
 }
 
-// Memoized StatCard component
 const StatCard = memo(
   ({ title, value, Icon, loading, color, description }: StatCardProps) => {
     const colorVariants = {
@@ -98,7 +96,6 @@ const StatCard = memo(
 );
 StatCard.displayName = "StatCard";
 
-// Memoized ActionCard component
 const ActionCard = memo(
   ({ title, description, Icon, onClick, color }: ActionCardProps) => {
     const colorVariants = {
@@ -143,7 +140,6 @@ const ActionCard = memo(
 );
 ActionCard.displayName = "ActionCard";
 
-// Memoized MotivationalQuote component
 const MotivationalQuote = memo(() => {
   const quotes = [
     "Belajar adalah petualangan seru setiap hari!",
@@ -175,7 +171,6 @@ const MotivationalQuote = memo(() => {
 });
 MotivationalQuote.displayName = "MotivationalQuote";
 
-// Memoized ProgressTracker component
 const ProgressTracker = memo(
   ({
     completedTasks,
@@ -249,7 +244,6 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, fetchStats]);
 
-  // Memoized time-based greeting
   const timeBasedInfo = useMemo(() => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 11) {

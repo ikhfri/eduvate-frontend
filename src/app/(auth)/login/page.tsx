@@ -1,4 +1,3 @@
-// app/login/page.tsx (atau di mana pun path Anda)
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -11,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import confetti from "canvas-confetti";
 
-// Komponen Input Kustom untuk email (tanpa tombol toggle)
 const FormInput = ({ id, label, icon: Icon, ...props }: any) => (
   <div className="space-y-2">
     <label htmlFor={id} className="text-sm font-medium text-foreground">
@@ -31,7 +29,7 @@ const FormInput = ({ id, label, icon: Icon, ...props }: any) => (
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState(false); // State untuk lihat password
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { login } = useAuth();
@@ -73,41 +71,38 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-background">
-      {/* --- PANEL VISUAL (SISI KIRI) --- */}
-      <div className="hidden lg:flex flex-col items-center justify-center p-12 text-white bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 animated-gradient relative overflow-hidden">
+      <div className="hidden lg:flex flex-col items-center justify-center p-12 text-white bg-gradient-to-br from-purple-950 via-blue-900 to-teal-800 animated-gradient relative overflow-hidden">
         <div className="absolute top-10 left-10 w-48 h-48 bg-white/10 rounded-full filter blur-3xl opacity-50"></div>
         <div className="absolute bottom-10 right-10 w-48 h-48 bg-white/10 rounded-full filter blur-3xl opacity-50"></div>
         <div className="relative z-10 text-center">
           <Image
             src="/logo.png"
-            alt="Nevtik LMS Logo"
-            width={100}
-            height={100}
+            alt="Eduvate LMS Logo"
+            width={200}
+            height={200}
             className="mx-auto mb-6 drop-shadow-lg"
             priority
           />
-          {/* --- PERUBAHAN TEKS BANNER --- */}
           <p className="text-3xl font-medium tracking-tight text-white/80">
             Selamat Datang di
           </p>
           <h1 className="text-6xl font-extrabold leading-tight tracking-tighter drop-shadow-md">
-            NEVTIK LP
+            Eduvate LMS
           </h1>
           <p className="mt-4 text-lg max-w-sm text-white/80">
-            &quot;Everyone can browse, but only a few know how the internet works. Be
-            the one who understands.&quot;
+            &quot;Everyone can browse, but only a few know how the internet
+            works. Be the one who understands.&quot;
           </p>
         </div>
       </div>
 
-      {/* --- PANEL FORM (SISI KANAN) --- */}
       <div className="flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:hidden">
             <Link href="/" className="inline-block mb-4">
               <Image
                 src="/logo.png"
-                alt="Nevtik LMS Logo"
+                alt="Eduvate LMS Logo"
                 width={70}
                 height={70}
               />
@@ -147,7 +142,6 @@ export default function LoginPage() {
               required
             />
 
-            {/* --- INPUT PASSWORD BARU DENGAN TOMBOL LIHAT/SEMBUNYIKAN --- */}
             <div className="space-y-2">
               <label
                 htmlFor="password"
@@ -199,7 +193,7 @@ export default function LoginPage() {
           <p className="text-center text-sm text-muted-foreground">
             Belum punya akun?{" "}
             <Link
-              href="https://wa.me/6281229184336?text=Halo%20saya%20mau%20bertanya"
+              href="https://wa.me/623333333333333?text=Halo%20saya%20mau%20bertanya"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-primary hover:underline"

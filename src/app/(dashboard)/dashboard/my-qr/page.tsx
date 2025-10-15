@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/my-qr/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -18,7 +17,6 @@ export default function MyQrPage() {
   return (
     <ProtectedRoute allowedRoles={["STUDENT"]}>
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-blue-50 dark:bg-blue-950 transition-colors duration-500">
-        {/* Tombol Kembali */}
         <Button
           onClick={() => router.back()}
           variant="ghost"
@@ -27,7 +25,6 @@ export default function MyQrPage() {
           <ChevronLeft className="h-5 w-5 mr-2" /> Kembali
         </Button>
 
-        {/* Kartu Identitas Digital */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -45,7 +42,6 @@ export default function MyQrPage() {
                 </p>
               </div>
 
-              {/* Kontainer untuk QR Code atau Loader */}
               <div className="relative flex justify-center items-center aspect-square">
                 {user ? (
                   <div className="p-4 bg-white rounded-lg shadow-inner">
@@ -56,7 +52,7 @@ export default function MyQrPage() {
                       fgColor="#000000"
                       level="H"
                       imageSettings={{
-                        src: "/logo.png", // Ganti dengan path logo yang valid atau gunakan placeholder
+                        src: "/logo.png", 
                         height: 40,
                         width: 40,
                         excavate: true,
@@ -69,7 +65,6 @@ export default function MyQrPage() {
               </div>
             </div>
 
-            {/* Informasi Pengguna di Bagian Bawah Kartu */}
             {user && (
               <div className="bg-muted/50 p-4 border-t text-center">
                 <p className="font-semibold text-lg">{user.name}</p>

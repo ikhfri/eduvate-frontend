@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-user/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -88,7 +87,6 @@ import {
   Search,
 } from "lucide-react";
 
-// --- Type Definitions & Helpers ---
 type UserRole = "ADMIN" | "MENTOR" | "STUDENT";
 interface UserData {
   id: string;
@@ -118,10 +116,8 @@ const getInitials = (name: string | null) =>
     .join("")
     .toUpperCase() || "U";
 
-// --- Child Components ---
 const SkeletonLoader = () => (
   <>
-    {/* Mobile Skeleton */}
     <div className="md:hidden space-y-4">
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="border rounded-lg p-4 space-y-3">
@@ -138,7 +134,6 @@ const SkeletonLoader = () => (
         </div>
       ))}
     </div>
-    {/* Desktop Skeleton */}
     <div className="hidden md:block">
       <Table>
         <TableHeader>
@@ -179,7 +174,6 @@ const SkeletonLoader = () => (
   </>
 );
 
-// --- Main Page Component ---
 export default function ManageUsersPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -423,7 +417,6 @@ export default function ManageUsersPage() {
           </AnimatePresence>
         </div>
 
-        {/* Desktop View: Table */}
         <div className="hidden md:block">
           <Table>
             <TableHeader>

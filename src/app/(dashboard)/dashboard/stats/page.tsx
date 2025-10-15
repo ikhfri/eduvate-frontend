@@ -1,9 +1,7 @@
-// app/(dashboard)/dashboard/statistik/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-// FIX: Hapus useRouter karena tidak digunakan
-// import { useRouter } from "next/navigation";
+
 import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -25,7 +23,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Interface untuk data statistik
 interface DetailedStatsData {
   userStats: { role: string; count: number }[];
   taskStats: {
@@ -39,11 +36,8 @@ interface DetailedStatsData {
     averageScore: number | null;
   };
 }
-
-// Palet warna baru yang lebih modern untuk chart
 const CHART_COLORS = ["#3b82f6", "#22c55e", "#a855f7", "#f97316", "#ec4899"];
 
-// Tooltip kustom untuk Recharts agar sesuai tema
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -55,7 +49,6 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-// Kartu Induk untuk setiap seksi statistik
 const StatSectionCard = ({ title, icon: Icon, children, color }: any) => (
   <div className="bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col overflow-hidden">
     <div
@@ -68,7 +61,6 @@ const StatSectionCard = ({ title, icon: Icon, children, color }: any) => (
   </div>
 );
 
-// Komponen untuk menampilkan satu item statistik (angka & label)
 const StatItem = ({
   label,
   value,
@@ -83,8 +75,7 @@ const StatItem = ({
 );
 
 export default function StatisticsPage() {
-  // FIX: Hapus useRouter
-  // const router = useRouter();
+
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [statsData, setStatsData] = useState<DetailedStatsData | null>(null);
@@ -110,8 +101,7 @@ export default function StatisticsPage() {
     } finally {
       setIsLoading(false);
     }
-    // FIX: ESLint warning diabaikan karena dependensi ini memang benar diperlukan
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [user, toast]);
 
   useEffect(() => {
@@ -139,12 +129,10 @@ export default function StatisticsPage() {
         <p className="text-muted-foreground mb-4">
           Hanya Admin dan Mentor yang dapat mengakses halaman ini.
         </p>
-        {/* Tombol kembali ini bisa menggunakan Link atau router.back() jika ada history */}
       </div>
     );
   }
 
-  // FIX: Pengecekan `!statsData` yang kuat sebelum merender
   if (error || !statsData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] text-center p-4">

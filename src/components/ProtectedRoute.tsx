@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: Array<"STUDENT" | "ADMIN" | "MENTOR">; // Opsional, untuk proteksi berbasis peran
+  allowedRoles?: Array<"STUDENT" | "ADMIN" | "MENTOR">; 
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
@@ -18,19 +18,18 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   useEffect(() => {
     if (!loading) {
       if (!user || !token) {
-        router.replace("/login"); // Jika tidak login, arahkan ke login
+        router.replace("/login"); 
       } else if (
         allowedRoles &&
         allowedRoles.length > 0 &&
         !allowedRoles.includes(user.role)
       ) {
-        // Jika ada role yang diizinkan dan user tidak memiliki role tersebut
         console.warn(
           `Akses ditolak untuk role: ${
             user.role
           } ke rute yang memerlukan: ${allowedRoles.join(", ")}`
         );
-        router.replace("/dashboard"); // Arahkan ke dashboard (atau halaman unauthorized)
+        router.replace("/dashboard"); 
       }
     }
   }, [user, loading, token, router, allowedRoles]);
@@ -39,7 +38,6 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
         {" "}
-        {/* Sesuaikan tinggi */}
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="ml-4 text-lg mt-4">Memverifikasi sesi Anda...</p>
       </div>
@@ -51,7 +49,6 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     allowedRoles.length > 0 &&
     !allowedRoles.includes(user.role)
   ) {
-    // Tampilkan pesan akses ditolak jika peran tidak sesuai, sebelum redirect terjadi
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
         <AlertCircle className="h-12 w-12 text-destructive" />

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// app/(dashboard)/dashboard/manage-kuis/[quizId]/edit/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -33,7 +32,6 @@ interface QuizFormData {
   submissionStartDate: string;
 }
 
-// Fungsi untuk memformat ISO string ke format yyyy-MM-DDTHH:mm
 const formatDateTimeLocal = (isoString: string | null | undefined): string => {
   if (!isoString) return "";
   try {
@@ -84,7 +82,7 @@ export default function EditQuizPage() {
         setFormData({
           title: quizData.title || "",
           description: quizData.description || "",
-          duration: String(quizData.duration || "60"), // Ambil durasi dari backend
+          duration: String(quizData.duration || "60"), 
           deadline: formatDateTimeLocal(quizData.deadline),
           submissionStartDate: formatDateTimeLocal(
             quizData.submissionStartDate

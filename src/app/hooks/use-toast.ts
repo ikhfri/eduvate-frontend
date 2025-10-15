@@ -2,10 +2,10 @@
 "use client";
 
 import * as React from "react";
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast"; // Pastikan path ini benar
+import type { ToastActionElement, ToastProps } from "@/components/ui/toast"; 
 
-const TOAST_LIMIT = 1; // Hanya 1 toast yang muncul pada satu waktu
-const TOAST_REMOVE_DELAY = 5000; // Toast hilang setelah 5 detik
+const TOAST_LIMIT = 1; 
+const TOAST_REMOVE_DELAY = 5000; 
 
 type ToasterToast = ToastProps & {
   id: string;
@@ -80,9 +80,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action;
 
-      // Pastikan toastId tidak undefined sebelum digunakan untuk filter
       if (toastId === undefined) {
-        // Jika toastId tidak ada, hapus semua toast (atau toast terakhir jika TOAST_LIMIT = 1)
         return {
           ...state,
           toasts: state.toasts.map((t) => ({

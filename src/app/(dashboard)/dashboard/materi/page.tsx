@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/materi/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -117,7 +116,7 @@ export default function MaterialsPage() {
                     src={
                       material.thumbnailUrl ||
                       "https://placehold.co/600x400/e2e8f0/e2e8f0?text=."
-                    } // Fallback ke placeholder kosong
+                    } 
                     alt={`Thumbnail untuk ${material.title}`}
                     layout="fill"
                     objectFit="cover"

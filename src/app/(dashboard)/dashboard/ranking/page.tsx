@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/ranking/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -25,7 +24,7 @@ interface RankedStudent {
 }
 
 interface RankingData {
-  quizTitle: string; // Walaupun namanya quizTitle, kita gunakan untuk judul halaman
+  quizTitle: string;
   attempts: RankedStudent[];
   isRevealed: boolean;
 }
@@ -120,7 +119,7 @@ export default function RankingPage() {
     try {
       await axiosInstance.post(endpoint);
       toast({ title: "Sukses", description: successMessage });
-      fetchRanking(); // Refresh data untuk mendapatkan status terbaru
+      fetchRanking(); 
     } catch (err: any) {
       toast({
         title: "Error",
@@ -197,7 +196,6 @@ export default function RankingPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* FIX: Menambahkan .slice(0, 5) untuk memastikan hanya 5 teratas yang ditampilkan */}
             {rankingData?.attempts.slice(0, 5).map((student, index) => (
               <RankCard key={student.id} student={student} rank={index + 1} />
             ))}

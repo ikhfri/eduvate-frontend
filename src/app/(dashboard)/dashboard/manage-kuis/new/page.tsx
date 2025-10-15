@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/manage-kuis/new/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -29,11 +28,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { formatISO, parse, isValid } from "date-fns";
 
-// Interface diperbarui untuk menyertakan durasi
 interface NewQuizFormState {
   title: string;
   description: string;
-  duration: string; // Durasi dalam menit, disimpan sebagai string di form
+  duration: string; 
   deadline: string;
   submissionStartDate: string;
 }
@@ -46,7 +44,7 @@ export default function CreateNewQuizPage() {
   const [formData, setFormData] = useState<NewQuizFormState>({
     title: "",
     description: "",
-    duration: "60", // Default durasi 60 menit
+    duration: "60", 
     deadline: "",
     submissionStartDate: "",
   });
@@ -148,7 +146,7 @@ export default function CreateNewQuizPage() {
       const payload: any = {
         title: formData.title,
         description: formData.description || null,
-        duration: durationValue, // Kirim durasi sebagai angka
+        duration: durationValue,
         deadline: isoDeadline,
         authorId: user.id,
       };

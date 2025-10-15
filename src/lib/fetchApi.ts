@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface FetchApiOptions extends RequestInit {
   token?: string | null;
-  body?: any; // Bisa FormData atau objek JSON
+  body?: any; 
 }
 
 export async function fetchApi(
@@ -16,8 +16,6 @@ export async function fetchApi(
     headers.append("Authorization", `Bearer ${token}`);
   }
 
-  // Hanya set Content-Type jika body bukan FormData
-  // Fetch akan otomatis set Content-Type untuk FormData
   if (body && !(body instanceof FormData)) {
     headers.append("Content-Type", "application/json");
   }
@@ -40,19 +38,16 @@ export async function fetchApi(
     try {
       errorData = await response.json();
     } catch (e) {
-      // Jika respons bukan JSON, gunakan statusText
       errorData = { message: response.statusText };
     }
-    // Buat error yang lebih informatif
     const error = new Error(
       errorData.message || `Request failed with status ${response.status}`
     ) as any;
-    error.response = response; // Lampirkan seluruh objek response
-    error.data = errorData; // Lampirkan data error jika ada
+    error.response = response; 
+    error.data = errorData; 
     throw error;
   }
 
-  // Jika respons tidak memiliki body (misalnya 204 No Content)
   if (
     response.status === 204 ||
     response.headers.get("content-length") === "0"

@@ -43,7 +43,6 @@ const formatDateSafe = (
   }
 };
 
-// Komponen Kartu Kuis dengan Desain Baru
 const QuizCard = ({
   quiz,
   isLocked,
@@ -58,7 +57,6 @@ const QuizCard = ({
 
   return (
     <div className="bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1.5">
-      {/* Header Kartu dengan Warna Tematik Hijau */}
       <div className="p-5 bg-gradient-to-br from-teal-600 to-green-700 text-white relative">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10"></div>
         <div className="relative z-10">
@@ -101,7 +99,6 @@ const QuizCard = ({
         )}
       </div>
 
-      {/* Footer Kartu */}
       <div className="p-4 bg-secondary/30 mt-auto">
         <button
           onClick={() => handleTakeQuiz(quiz.id)}
@@ -165,7 +162,6 @@ export default function StudentAvailableQuizzesPage() {
   return (
     <ProtectedRoute allowedRoles={["STUDENT", "ADMIN", "MENTOR"]}>
       <div className="container mx-auto p-4 md:p-6 space-y-8">
-        {/* HERO BANNER BARU */}
         <div className="relative p-8 rounded-2xl shadow-lg bg-gradient-to-br from-teal-500 to-green-600 text-white overflow-hidden">
           <BookOpenCheck className="absolute -right-8 -bottom-8 h-48 w-48 text-white/10" />
           <div className="relative z-10">
