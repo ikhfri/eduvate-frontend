@@ -400,24 +400,7 @@ export default function ManageSubmissionsPage() {
               <form onSubmit={handleGradeSubmit} className="space-y-4 py-2">
                 {selectedSubmission.fileUrl && (
                   <div className="mb-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="w-full"
-                    >
-                      <a
-                        href={`${
-                          process.env.NEXT_PUBLIC_API_BASE_URL ||
-                          "http://localhost:3001"
-                        }${selectedSubmission.fileUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FileText className="h-4 w-4 mr-2" /> Lihat File Jawaban
-                        Siswa
-                      </a>
-                    </Button>
+                   
                   </div>
                 )}
                 <div>
