@@ -1,4 +1,3 @@
-// lms-frontend/lib/axiosInstance.ts
 import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,

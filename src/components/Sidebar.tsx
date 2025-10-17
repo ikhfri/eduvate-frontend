@@ -148,6 +148,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       navGroups.push({
         title: "Pengelolaan",
         links: [
+          
           {
             href: "/dashboard/manage-materi",
             label: "Kelola Materi",
